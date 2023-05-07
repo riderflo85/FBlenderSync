@@ -1,5 +1,3 @@
-Voici un exemple de fichier README pour votre projet FBlenderSync :
-
 # FBlenderSync
 
 FBlenderSync est une application Python pour Blender qui permet aux utilisateurs de stocker et télécharger leurs fichiers Blender sur le cloud Dropbox. Cette application permet aux utilisateurs de Blender qui changent d'ordinateur de retrouver leurs fichiers facilement, de les télécharger pour les ouvrir automatiquement avec Blender et de les envoyer sur leur compte Dropbox.
