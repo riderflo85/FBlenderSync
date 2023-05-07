@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime
 from datetime import timedelta
 
@@ -33,3 +35,19 @@ def token_is_expired(expire_at: timedelta) -> bool:
         bool: result of check
     """
     return datetime.now() < expire_at
+
+
+def load_json_config(json_file_path: str) -> dict:
+    """Read the json file config.
+
+    Args:
+        json_file_path (str): json file object.
+
+    Returns:
+        dict: Dict to contain the json file data.
+    """
+    data = {}
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
+
+    return data
