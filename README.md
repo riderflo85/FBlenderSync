@@ -36,6 +36,12 @@ pip install requests
 6. Pour téléverser un fichier sur Dropbox, sélectionnez "FBlenderSync" > "Upload File" et sélectionnez le fichier à téléverser. Le fichier sera téléversé dans le dossier par défaut spécifié dans les paramètres.
 7. Pour télécharger un fichier depuis Dropbox, sélectionnez "FBlenderSync" > "Download File" et sélectionnez le fichier à télécharger. Le fichier sera téléchargé dans le dossier par défaut spécifié dans les paramètres et ouvert automatiquement avec Blender.
 
+## Utilisation de la bibliothèque Python Requests
+
+Pour interagir avec l'API Dropbox, FBlenderSync utilise la bibliothèque Python Requests. Cette bibliothèque est une alternative légère et populaire au SDK Python de Dropbox et est couramment utilisée dans de nombreux projets Python. En utilisant Requests, nous évitons d'ajouter une dépendance supplémentaire à installer au niveau global sur la machine de l'utilisateur, ce qui peut rendre l'installation et la configuration de l'application plus complexes pour l'utilisateur final.
+
+Si vous souhaitez utiliser une autre bibliothèque pour interagir avec l'API Dropbox, vous pouvez modifier le code en conséquence. Veuillez noter que cela peut nécessiter l'installation de dépendances supplémentaires.
+
 ## Licence
 
 FBlenderSync est sous licence MIT. Veuillez consulter le fichier LICENSE pour plus d'informations.
