@@ -5,13 +5,13 @@ from datetime import timedelta
 
 
 ACCESS_TOKEN = {
-    'token': str,
+    'token': '',
     'expire_at': datetime
 }
-REFRESH_TOKEN: str
+REFRESH_TOKEN = ''
 
 
-def next_expire_time(expires_in: int) -> datetime.datetime:
+def next_expire_time(expires_in: int) -> datetime:
     """Calculate the next expire time to dropbox API token.
 
     Args:
