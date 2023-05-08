@@ -1,7 +1,7 @@
-from dropbox import DropboxAPI
 from helpers import load_json_config
 from helpers import next_expire_time
 from helpers import write_json_config
+from server import DropboxAPI
 from settings import CONFIG_FILE
 
 

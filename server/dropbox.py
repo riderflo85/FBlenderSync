@@ -3,8 +3,8 @@ import requests
 
 from settings import HOST
 from settings import PORT
-from server import create_socket
-from server import wait_authorization_code
+from .web import create_socket
+from .web import wait_authorization_code
 
 
 class DropboxError(Exception):
