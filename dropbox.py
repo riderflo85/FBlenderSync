@@ -1,8 +1,6 @@
 import webbrowser
 import requests
 
-from helpers import ACCESS_TOKEN
-from helpers import REFRESH_TOKEN
 from settings import HOST
 from settings import PORT
 from server import create_socket
@@ -46,7 +44,7 @@ class DropboxAPI:
             else:
                 nb_request += 1
 
-    def _make_headers(self, token: str) -> dict:
+    def _make_headers(self, token: str, **kwargs) -> dict:
         """Create the headers requests.
         Add access token.
 
@@ -57,7 +55,9 @@ class DropboxAPI:
             dict: headers for request
         """
         headers = {
-            'Authorization': f'Bearer {token}'
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+            **kwargs
         }
         return headers
 
@@ -85,12 +85,12 @@ class DropboxAPI:
         # "account_id": "...",
         # "uid": "..."
         # }
-        data = res.json()
 
         if res.status_code != 200:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(res.text)
         else:
+            data = res.json()
             r_fields = ['access_token', 'refresh_token', 'expires_in']
             return {
                 k: v for k, v in data.items() if k in r_fields
@@ -128,7 +128,7 @@ class DropboxAPI:
             'include_non_downloadable_files': False
         }
         h = self._make_headers(token)
-        res = requests.post(url, data=payload, headers=h)
+        res = requests.post(url, json=payload, headers=h)
         # data for good response is :
         # {
         #     "entries": [
@@ -143,11 +143,11 @@ class DropboxAPI:
         #     "cursor": "WCOi340_Ghw3B5VCW5-MKZNs6LhaJ2vUDwj_ha_g",
         #     "has_more": false
         # }
-        data = res.json()
 
         if res.status_code != 200:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(res.text)
         else:
+            data = res.json()
             #TODO Voir pour gérer la pagination avec les valeurs `has_more` et `cursor`
             return data['entries']
