@@ -1,12 +1,21 @@
+import os
+
 from helpers import load_json_config
 from helpers import next_expire_time
 from helpers import write_json_config
 from server import DropboxAPI
 from settings import CONFIG_FILE
+from settings import LOCAL_STORAGE_FOLDER
 
 
 if __name__ == '__main__':
     config = load_json_config(CONFIG_FILE)
+    LOCAL_STORAGE_FOLDER = config.get('LOCAL_STORAGE_FOLDER', '')
+
+    if not os.path.isdir(LOCAL_STORAGE_FOLDER):
+        #TODO Renvoyer l'erreur dans l'interface de blender !!!
+        print('FILE LOCAL STORAGE DOES NOT EXIST !!!')
+        exit()
 
     drb = DropboxAPI(config['APP_KEY'], config['APP_SECRET'])
 
@@ -17,7 +26,7 @@ if __name__ == '__main__':
         to_add_config = {
             'ACCESS_TOKEN': token_obj['access_token'],
             'REFRESH_TOKEN': token_obj['refresh_token'],
-            'TOKEN_END_VALIDATON': end_validation
+            'TOKEN_END_VALIDATION': end_validation
         }
         write_json_config(CONFIG_FILE, config, to_add_config)
         token = token_obj['access_token']
@@ -30,7 +39,7 @@ if __name__ == '__main__':
     print('\t2) Télécharger un fichier de ton cloud.')
     print('\t0) Arreter le programme.')
     close = False
-    
+
     while not close:
         user_choice = input('>> ')
 
