@@ -2,17 +2,17 @@ import os
 
 from helpers import load_json_config
 from helpers import next_expire_time
+from helpers import write_file
 from helpers import write_json_config
 from server import DropboxAPI
 from settings import CONFIG_FILE
-from settings import LOCAL_STORAGE_FOLDER
 
 
 if __name__ == '__main__':
     config = load_json_config(CONFIG_FILE)
-    LOCAL_STORAGE_FOLDER = config.get('LOCAL_STORAGE_FOLDER', '')
+    local_storage_folder = config.get('LOCAL_STORAGE_FOLDER', '')
 
-    if not os.path.isdir(LOCAL_STORAGE_FOLDER):
+    if not os.path.isdir(local_storage_folder):
         #TODO Renvoyer l'erreur dans l'interface de blender !!!
         print('FILE LOCAL STORAGE DOES NOT EXIST !!!')
         exit()
@@ -56,6 +56,14 @@ if __name__ == '__main__':
             print('\tDropbox files : ')
             for index, folder in enumerate(struct_folder):
                 print('\t ', index, '. ', folder)
+
+        elif user_choice == '2':
+            print('\tIndique le chemin complet du fichier que tu veux télécharger !')
+            folder_file_path = input('>>> ')
+            
+            file_infos, file_bytes = drb.download_file(token, folder_file_path)
+            file_name = f'{local_storage_folder}/{file_infos.get("name")}'
+            write_file(file_name, file_bytes)
 
         elif user_choice in ('exit', '0'):
             close = True

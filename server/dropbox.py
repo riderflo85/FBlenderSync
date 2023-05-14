@@ -1,13 +1,18 @@
 import webbrowser
 import requests
 import os
+import json
 
 from helpers import load_json_config
 from helpers import next_expire_time
 from helpers import write_json_config
 from settings import CONFIG_FILE
+from settings import DROPBOX_API_URL as DRB_API
+from settings import DROPBOX_CONTENT_URL as DRB_CONTENT
+from settings import DROPBOX_OAUTH_URL as DRB_OAUTH
 from settings import HOST
 from settings import PORT
+from settings import REDIRECT_WEB_URI as REDIRECT_URI
 from .web import create_socket
 from .web import wait_authorization_code
 
@@ -24,9 +29,6 @@ class DropboxError(Exception):
 
 
 class DropboxAPI:
-    DRB_OAUTH_URL = 'https://www.dropbox.com/oauth2/authorize'
-    DRB_API = 'https://api.dropboxapi.com'
-    REDIRECT_URI = f'http://{HOST}:{str(PORT)}'
 
     def __init__(self, app_key: str, app_secret: str) -> None:
         self.app_key = app_key
@@ -37,7 +39,7 @@ class DropboxAPI:
         """
         Open the web browser with authoriation web page to allow FBlenderSync connect to your account.
         """
-        url_auth_app = f'{self.DRB_OAUTH_URL}?client_id={self.app_key}&token_access_type=offline&response_type=code&redirect_uri={self.REDIRECT_URI}'
+        url_auth_app = f'{DRB_OAUTH}?client_id={self.app_key}&token_access_type=offline&response_type=code&redirect_uri={REDIRECT_URI}'
         webbrowser.open(url_auth_app)
 
         sock_serv = create_socket(HOST, PORT)
@@ -99,11 +101,11 @@ class DropboxAPI:
         if not self.oauth_code:
             self._authorization_app()
 
-        url = f'{self.DRB_API}/oauth2/token'
+        url = f'{DRB_API}/oauth2/token'
         payload = {
             'code': self.oauth_code,
             'grant_type': 'authorization_code',
-            'redirect_uri': self.REDIRECT_URI, # Not used to redirect again
+            'redirect_uri': REDIRECT_URI, # Not used to redirect again
             'client_id': self.app_key,
             'client_secret': self.app_secret
         }
@@ -132,7 +134,7 @@ class DropboxAPI:
     def refresh_api_token(self):
         """Refresh the access token"""
         config = load_json_config(CONFIG_FILE)
-        url = f'{self.DRB_API}/oauth2/token'
+        url = f'{DRB_API}/oauth2/token'
         payload = {
             'grant_type': 'refresh_token',
             'refresh_token': config['REFRESH_TOKEN'],
@@ -167,7 +169,7 @@ class DropboxAPI:
         Returns:
             list: List object with folder name, folder content, folder type, folder id and folder path.
         """
-        url = f'{self.DRB_API}/2/files/list_folder'
+        url = f'{DRB_API}/2/files/list_folder'
         payload = {
             'path': path, 
             'recursive': False, 
@@ -204,23 +206,23 @@ class DropboxAPI:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(result['error'])
 
-    def download_file(self, token: str, path: str) -> bytes:
+    def download_file(self, token: str, path: str) -> tuple[dict, bytes]:
         """Download DropBox file.
 
         Args:
             token (str): User Access Token
-            path (str): Dropbox folder path
+            path (str): Dropbox folder path with filename
 
         Returns:
-            bytes: File bytes content
+            tuple: Dict file informations and file bytes content
         """
-        url = f'{self.DRB_API}/2/files/download'
-        h = self._make_headers(token, Dropbox_API_Arg=f'{{"path": {path}}}')
+        url = f'{DRB_CONTENT}/2/files/download'
+        h = self._make_headers(token, Dropbox_API_Arg=f'{{"path": "{path}"}}')
         res = requests.get(url, headers=h)
 
         result = self._is_expired_token(res)
         if not result.get('error') and not result['fallback']:
-            return res.content
+            return json.loads(res.headers.get('Dropbox-Api-Result')), res.content
         elif not result.get('error') and result['fallback']:
             return self.download_file(result['new_token'], path)
         else:
