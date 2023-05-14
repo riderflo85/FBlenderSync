@@ -1,5 +1,6 @@
 import webbrowser
 import requests
+import os
 
 from helpers import load_json_config
 from helpers import next_expire_time
@@ -65,7 +66,6 @@ class DropboxAPI:
 
         headers = {
             'Authorization': f'Bearer {token}',
-            # 'Content-Type': 'application/json',
             **kw_copy
         }
         return headers
@@ -148,6 +148,8 @@ class DropboxAPI:
                 'ACCESS_TOKEN': data['access_token'],
                 'TOKEN_END_VALIDATION': end_validation
             }
+            os.environ['ACCESS_TOKEN'] = data['access_token']
+            os.environ['TOKEN_END_VALIDATION'] = end_validation.isoformat()
             write_json_config(CONFIG_FILE, config, to_update_config)
             return data['access_token']
         else:
@@ -215,9 +217,12 @@ class DropboxAPI:
         url = f'{self.DRB_API}/2/files/download'
         h = self._make_headers(token, Dropbox_API_Arg=f'{{"path": {path}}}')
         res = requests.get(url, headers=h)
-        
-        if res.status_code != 200:
-            #TODO Renvoyer l'erreur dans l'interface de blender !!!
-            raise DropboxError(res.text)
-        else:
+
+        result = self._is_expired_token(res)
+        if not result.get('error') and not result['fallback']:
             return res.content
+        elif not result.get('error') and result['fallback']:
+            return self.download_file(result['new_token'], path)
+        else:
+            #TODO Renvoyer l'erreur dans l'interface de blender !!!
+            raise DropboxError(result['error'])

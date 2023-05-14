@@ -21,7 +21,6 @@ if __name__ == '__main__':
 
     if not config['ACCESS_TOKEN']:
         token_obj = drb.get_access_token()
-        print(token_obj)
         end_validation = next_expire_time(token_obj['expires_in'])
         to_add_config = {
             'ACCESS_TOKEN': token_obj['access_token'],
@@ -29,10 +28,10 @@ if __name__ == '__main__':
             'TOKEN_END_VALIDATION': end_validation
         }
         write_json_config(CONFIG_FILE, config, to_add_config)
-        token = token_obj['access_token']
+        os.environ['ACCESS_TOKEN'] = token_obj['access_token']
     else:
-        print('TOKEN already set !')
-        token = config['ACCESS_TOKEN']
+        os.environ['ACCESS_TOKEN'] = config['ACCESS_TOKEN']
+
 
     print('\nQue veux-tu faire ?')
     print('\t1) Consulter tes dossiers sur ton cloud.')
@@ -41,6 +40,7 @@ if __name__ == '__main__':
     close = False
 
     while not close:
+        token = os.environ.get('ACCESS_TOKEN')
         user_choice = input('>> ')
 
         if user_choice == '1':
