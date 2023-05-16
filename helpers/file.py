@@ -17,3 +17,12 @@ def write_file(path_file_name: str, bytes_content: bytes):
     else:
         #TODO Renvoyer l'erreur dans l'interface de blender !!!
         print('FILE IS NOT WRITED !!!')
+
+
+def check_local_path_file(path_file_name: str):
+    """Check if local path file is exist or not.
+
+    Args:
+        path_file_name (str): local path file
+    """
+    return os.path.isfile(path_file_name)

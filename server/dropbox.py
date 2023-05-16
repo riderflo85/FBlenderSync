@@ -3,6 +3,8 @@ import requests
 import os
 import json
 
+from typing import Literal
+
 from helpers import load_json_config
 from helpers import next_expire_time
 from helpers import write_json_config
@@ -225,6 +227,51 @@ class DropboxAPI:
             return json.loads(res.headers.get('Dropbox-Api-Result')), res.content
         elif not result.get('error') and result['fallback']:
             return self.download_file(result['new_token'], path)
+        else:
+            #TODO Renvoyer l'erreur dans l'interface de blender !!!
+            raise DropboxError(result['error'])
+
+    def upload_file(
+        self,
+        token: str,
+        path_file: str,
+        dropbox_path_folder: str,
+        mode: Literal['add', 'overwrite']
+    ) -> str:
+        """Upload the file on DropBox folder sync.
+
+        Args:
+            token (str): User Access Token
+            path_file (str): Local path file with file name and extension
+            dropbox_path_folder (str): The folder path to Dropbox account
+            mode (Literal['add', 'overwrite']): The write file Dropbox mode.
+                See https://www.dropbox.com/developers/documentation/http/documentation#files-upload
+
+        Returns:
+            str: Finish state operation
+        """
+        url = f'{DRB_CONTENT}/2/files/upload'
+        data = {
+            'autorename': False,
+            'mute': False,
+            'strict_conflict': False,
+            'mode': mode,
+            'path': f'{dropbox_path_folder}/{path_file.split("/")[-1]}'
+        }
+        h = self._make_headers(
+            token,
+            Dropbox_API_Arg=json.dumps(data),
+            Content_Type='application/octet-stream'
+        )
+        file_req = open(path_file, 'rb')
+        res = requests.post(url, headers=h, data=file_req)
+        file_req.close()
+
+        result = self._is_expired_token(res)
+        if not result.get('error') and not result['fallback']:
+            return 'done'
+        elif not result.get('error') and result['fallback']:
+            return self.upload_file(result['new_token'], path_file, dropbox_path_folder, mode)
         else:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(result['error'])
