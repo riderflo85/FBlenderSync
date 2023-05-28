@@ -53,7 +53,8 @@ class DropboxAPI:
             else:
                 nb_request += 1
 
-    def _make_headers(self, token: str, **kwargs) -> dict:
+    @staticmethod
+    def _make_headers(token: str, **kwargs) -> dict:
         """Create the headers requests.
         Add access token.
 
