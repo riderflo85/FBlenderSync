@@ -1,32 +1,27 @@
 from bpy.types import AddonPreferences, Operator
 from bpy.props import StringProperty
 
-
-FR = {
-    'Drb-App-Key': 'Clé publique de votre application Dropbox.',
-    'Drb-App-Secret': 'Clé secrète de votre application Dropbox.',
-    'Pref-Header-Inputs': 'Entrez vous clés secrètes que vous pouvez retrouvez sur votre compte Dropbox.',
-    'Local-Storage-Folder': 'Dossier dans lequel sera téléchargé vos fichiers de votre cloud.',
-    'Bl-Label-Login': 'Connexion à l\'API Dropbox.',
-}
+from .mixins import FContextMixin
+from .statics import APP_NAME
+from .i18n import get_label as gt_
 
 
 class FBlenderSyncPreferences(AddonPreferences):
-    bl_idname = 'fblender_sync'
+    bl_idname = APP_NAME
     
     dropbox_app_key: StringProperty(
-        name=FR['Drb-App-Key'],
+        name=gt_('Drb-App-Key'),
         default='',
         options={'HIDDEN', 'SKIP_SAVE'}
     )
     dropbox_app_secret: StringProperty(
-        name=FR['Drb-App-Secret'],
+        name=gt_('Drb-App-Secret'),
         default='',
         options={'HIDDEN', 'SKIP_SAVE'},
         subtype='PASSWORD'
     )
     local_filepath: StringProperty(
-        name=FR['Local-Storage-Folder'],
+        name=gt_('Local-Storage-Folder'),
         default='',
         options={'HIDDEN'},
         subtype='DIR_PATH'
@@ -36,7 +31,7 @@ class FBlenderSyncPreferences(AddonPreferences):
         layout = self.layout
 
         col = layout.column(align=True)
-        col.label(text=FR['Pref-Header-Inputs'], icon='WORLD')
+        col.label(text=gt_('Pref-Header-Inputs'), icon='WORLD')
 
         layout.prop(self, 'dropbox_app_key')
         layout.prop(self, 'dropbox_app_secret')
@@ -44,13 +39,12 @@ class FBlenderSyncPreferences(AddonPreferences):
         layout.operator(FBlenderSyncLoginDropbox.bl_idname)
 
 
-class FBlenderSyncLoginDropbox(Operator):
-    bl_idname = 'fblender_sync.login_drb'
-    bl_label = FR['Bl-Label-Login']
+class FBlenderSyncLoginDropbox(FContextMixin, Operator):
+    bl_idname = f'{APP_NAME}.login_drb'
+    bl_label = gt_('Bl-Label-Login')
 
     def execute(self, context):
-        preferences = context.preferences
-        addon_prefs = preferences.addons['fblender_sync'].preferences
+        addon_prefs = self.addon_prefs # Defined in FContextMixin
         
         info = f'local_filepath -> {addon_prefs.local_filepath} | app key -> {addon_prefs.dropbox_app_key} | app secret -> {addon_prefs.dropbox_app_secret}'
         

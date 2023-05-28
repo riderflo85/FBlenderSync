@@ -14,7 +14,7 @@ bl_info = {
 import bpy
 
 
-if 'FBlenderSyncPreferences' in locals():
+if 'preference' in locals():
     import importlib
     preference = importlib.reload(preference)
     FBlenderSyncPreferences = preference.FBlenderSyncPreferences
