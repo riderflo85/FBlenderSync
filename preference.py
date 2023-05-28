@@ -4,11 +4,14 @@ from bpy.props import StringProperty
 from .mixins import FContextMixin
 from .statics import APP_NAME
 from .i18n import get_label as gt_
+from .profiles import make_profiles_path
+from .profiles import get_profiles_data
+from .profiles import save_profiles_data
 
 
 class FBlenderSyncPreferences(AddonPreferences):
     bl_idname = APP_NAME
-    
+
     dropbox_app_key: StringProperty(
         name=gt_('Drb-App-Key'),
         default='',
@@ -26,7 +29,7 @@ class FBlenderSyncPreferences(AddonPreferences):
         options={'HIDDEN'},
         subtype='DIR_PATH'
     )
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -44,11 +47,17 @@ class FBlenderSyncLoginDropbox(FContextMixin, Operator):
     bl_label = gt_('Bl-Label-Login')
 
     def execute(self, context):
-        addon_prefs = self.addon_prefs # Defined in FContextMixin
-        
-        info = f'local_filepath -> {addon_prefs.local_filepath} | app key -> {addon_prefs.dropbox_app_key} | app secret -> {addon_prefs.dropbox_app_secret}'
-        
-        self.report({'INFO'}, info)
-        print(info)
-        
+        addon_prefs = self.addon_prefs(context) # Defined in FContextMixin
+
+        self.report({'INFO'}, gt_('FB-Success-Write-Pref'))
+
+        profiles_path, profiles_file = make_profiles_path()
+        profiles_data = get_profiles_data(profiles_path, profiles_file)
+        profiles_data.update({
+            'APP_KEY': addon_prefs.dropbox_app_key,
+            'APP_SECRET': addon_prefs.dropbox_app_secret,
+            'LOCAL_STORAGE_FOLDER': addon_prefs.local_filepath
+        })
+        save_profiles_data(profiles_file, profiles_data)
+
         return {'FINISHED'}
