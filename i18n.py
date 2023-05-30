@@ -4,6 +4,7 @@ FR = (
     ('Pref-Header-Inputs', 'Entrez vous clés secrètes que vous pouvez retrouvez sur votre compte Dropbox.'),
     ('Local-Storage-Folder', 'Dossier dans lequel sera téléchargé vos fichiers de votre cloud.'),
     ('Bl-Label-Login', 'Connexion à l\'API Dropbox.'),
+    ('Bt-Save-Settings', 'Enregistrer'),
     ('FB-Success-Write-Pref', 'Enregistrement du profil avec succès !')
 )
 

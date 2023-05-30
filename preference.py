@@ -29,22 +29,49 @@ class FBlenderSyncPreferences(AddonPreferences):
         options={'HIDDEN'},
         subtype='DIR_PATH'
     )
+    token: StringProperty(
+        name='token',
+        default='',
+        options={'HIDDEN', 'SKIP_SAVE'}
+    )
+    refresh_token: StringProperty(
+        name='refresh-token',
+        default='',
+        options={'HIDDEN', 'SKIP_SAVE'}
+    )
+    expire_token: StringProperty(
+        name='expire-token',
+        default='',
+        options={'HIDDEN', 'SKIP_SAVE'}
+    )
 
     def draw(self, context):
         layout = self.layout
 
         col = layout.column(align=True)
         col.label(text=gt_('Pref-Header-Inputs'), icon='WORLD')
+    
+        if self.token == 'NOT-SET':
+            row_col = col.row()
+            row_col.label(text='Token non récupéré !', icon='BLANK1')
+            row_col.operator(FBlenderSyncLoginDropbox.bl_idname) # À remplacer par un vrai bouton, la c'est pour un test
+        # Faire le check pour la validation du token
+        # elif ....:
+        else:
+            col.label(text='Token encore valide', icon='FAKE_USER_ON')
+            
 
         layout.prop(self, 'dropbox_app_key')
         layout.prop(self, 'dropbox_app_secret')
         layout.prop(self, 'local_filepath')
-        layout.operator(FBlenderSyncLoginDropbox.bl_idname)
+        row = layout.row()
+        row.operator(FBlenderSyncSaveSettings.bl_idname)
+        row.operator(FBlenderSyncLoginDropbox.bl_idname)
 
 
-class FBlenderSyncLoginDropbox(FContextMixin, Operator):
-    bl_idname = f'{APP_NAME}.login_drb'
-    bl_label = gt_('Bl-Label-Login')
+class FBlenderSyncSaveSettings(FContextMixin, Operator):
+    bl_idname = f'{APP_NAME}.save_settings'
+    bl_label = gt_('Bt-Save-Settings')
 
     def execute(self, context):
         addon_prefs = self.addon_prefs(context) # Defined in FContextMixin
@@ -59,5 +86,17 @@ class FBlenderSyncLoginDropbox(FContextMixin, Operator):
             'LOCAL_STORAGE_FOLDER': addon_prefs.local_filepath
         })
         save_profiles_data(profiles_file, profiles_data)
+
+        return {'FINISHED'}
+
+
+class FBlenderSyncLoginDropbox(FContextMixin, Operator):
+    bl_idname = f'{APP_NAME}.login_drb'
+    bl_label = gt_('Bl-Label-Login')
+
+    def execute(self, context):
+        addon_prefs = self.addon_prefs(context) # Defined in FContextMixin
+
+        self.report({'INFO'}, 'Login success')
 
         return {'FINISHED'}

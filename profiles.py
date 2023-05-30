@@ -18,7 +18,8 @@ def _create_default_config(prof_path, prof_file):
         'APP_KEY': '',
         'LOCAL_STORAGE_FOLDER': '',
         'ACCESS_TOKEN': '',
-        'REFRESH_TOKEN': ''
+        'REFRESH_TOKEN': '',
+        'EXPIRE_TOKEN': '',
     }
 
     os.makedirs(prof_path, exist_ok=True)
