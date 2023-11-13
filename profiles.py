@@ -5,10 +5,61 @@ import bpy
 from .statics import APP_NAME
 
 
-def make_profiles_path() -> tuple:
+class FBlenderProfile:
+
+    APP_KEY = ''
+    APP_SECRET = ''
+    LOCAL_STORAGE_FOLDER = ''
+    ACCESS_TOKEN = ''
+    REFRESH_TOKEN = ''
+    EXPIRE_TOKEN = ''
+    profiles_path = ''
+    profiles_file = ''
+    json_settings = [
+        'APP_KEY',
+        'APP_SECRET',
+        'LOCAL_STORAGE_FOLDER',
+        'ACCESS_TOKEN',
+        'REFRESH_TOKEN',
+        'EXPIRE_TOKEN'
+    ]
+
+    @classmethod
+    def reset_profile(cls):
+        for setting in cls.json_settings:
+            setattr(cls, setting, '')
+
+    @classmethod
+    def read_json(cls):
+        """Updates the settings from the JSON file."""
+
+        cls.reset_profile()
+        config_json = get_profiles_data(cls.profiles_path, cls.profiles_file)
+        for key, value in config_json.items():
+            if hasattr(cls, key):
+                setattr(cls, key, value)
+            else:
+                print(f'Skipping key {key} from profile JSON')
+
+    @classmethod
+    def save_profiles_data(cls):
+        """Saves the profiles data to JSON."""
+        if cls.profiles_file != '':
+            data = {}
+            for setting in cls.json_settings:
+                data[setting] = getattr(cls, setting)
+
+            with open(cls.profiles_file, 'w', encoding='utf8') as outfile:
+                json.dump(data, outfile, sort_keys=True)
+        else:
+            raise AttributeError('FBlenderProfile has an empty `profiles_file` attribute.')
+
+
+def make_profiles_path():
     profiles_path = bpy.utils.user_resource('CONFIG', path=APP_NAME, create=True)
     profiles_file = os.path.join(profiles_path, 'profiles.json')
-    return profiles_path, profiles_file
+    FBlenderProfile.profiles_file = profiles_file
+    FBlenderProfile.profiles_path = profiles_path
 
 
 def _create_default_config(prof_path, prof_file):
@@ -72,10 +123,3 @@ def get_profiles_data(prof_path, prof_file):
             )
             # overwrite the file
             return _create_default_config(prof_path, prof_file)
-
-
-def save_profiles_data(prof_file: str, settings: dict):
-    """Saves the profiles data to JSON."""
-
-    with open(prof_file, 'w', encoding='utf8') as outfile:
-        json.dump(settings, outfile, sort_keys=True)

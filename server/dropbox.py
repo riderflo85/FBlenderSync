@@ -5,16 +5,16 @@ import json
 
 from typing import Literal
 
-from helpers import load_json_config
-from helpers import next_expire_time
-from helpers import write_json_config
-from settings import CONFIG_FILE
-from settings import DROPBOX_API_URL as DRB_API
-from settings import DROPBOX_CONTENT_URL as DRB_CONTENT
-from settings import DROPBOX_OAUTH_URL as DRB_OAUTH
-from settings import HOST
-from settings import PORT
-from settings import REDIRECT_WEB_URI as REDIRECT_URI
+from ..helpers import load_json_config
+from ..helpers import next_expire_time
+from ..helpers import write_json_config
+from ..settings import CONFIG_FILE
+from ..settings import DROPBOX_API_URL as DRB_API
+from ..settings import DROPBOX_CONTENT_URL as DRB_CONTENT
+from ..settings import DROPBOX_OAUTH_URL as DRB_OAUTH
+from ..settings import HOST
+from ..settings import PORT
+from ..settings import REDIRECT_WEB_URI as REDIRECT_URI
 from .web import create_socket
 from .web import wait_authorization_code
 
