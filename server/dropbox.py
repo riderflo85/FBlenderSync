@@ -42,6 +42,11 @@ class DropboxAPI:
         Open the web browser with authoriation web page to allow FBlenderSync connect to your account.
         """
         url_auth_app = f'{DRB_OAUTH}?client_id={self.app_key}&token_access_type=offline&response_type=code&redirect_uri={REDIRECT_URI}'
+
+        response_oauth = requests.get(url_auth_app)
+        if response_oauth.status_code != 200:
+            raise DropboxError(f'Invalid client_id : {self.app_key}')
+
         webbrowser.open(url_auth_app)
 
         sock_serv = create_socket(HOST, PORT)
@@ -209,7 +214,7 @@ class DropboxAPI:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(result['error'])
 
-    def download_file(self, token: str, path: str) -> tuple[dict, bytes]:
+    def download_file(self, token: str, path: str):
         """Download DropBox file.
 
         Args:

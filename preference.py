@@ -1,8 +1,11 @@
+from datetime import datetime
+
 import bpy
 from bpy.types import AddonPreferences, Operator
 from bpy.props import StringProperty
 
-from.server import DropboxAPI
+from .server import DropboxAPI
+from .server import DropboxError
 from .helpers import next_expire_time
 from .mixins import FContextMixin
 from .statics import APP_NAME
@@ -68,9 +71,15 @@ class FBlenderSyncPreferences(AddonPreferences):
         if self.error_msg:
             col.label(text=self.error_msg, icon='ERROR')
 
-        if self.token == 'NOT-SET':
+        if self.token in ['NOT-SET', '']:
             col.label(text=gt_('Ms-Not-Token'), icon='BLANK1')
-        # elif ....: token expiré
+        elif self.expire_token and (
+            datetime.now() > datetime.fromisoformat(self.expire_token)
+        ):
+            expire_token_msg = f"{gt_('Ms-Token-Expires-Out')} {self.expire_token}"
+            row_tok = col.row()
+            row_tok.label(text=gt_('Ms-Expired-Token'), icon='CANCEL')
+            row_tok.label(text=expire_token_msg)
         else:
             expire_token_msg = f"{gt_('Ms-Token-Expires-In')} {self.expire_token}"
             row_tok = col.row()
@@ -112,24 +121,31 @@ class FBlenderSyncLoginDropbox(FContextMixin, Operator):
         addon_prefs = self.addon_prefs(context) # Defined in FContextMixin
 
         drb = DropboxAPI(addon_prefs.dropbox_app_key, addon_prefs.dropbox_app_secret)
-        
-        #TODO ATTENTION VOIR BUG EN CAS DE DONNÉES DROPBOX INCORRET, L'APPLICATION BLENDER TOURNE EN BOUCLE !!!
 
         bpy.context.window.cursor_set('WAIT')
-        token_data = drb.get_access_token()
-        print('token data is : ', token_data)
-        expire_token_obj = next_expire_time(token_data['expires_in'])
-        expire_token = expire_token_obj.isoformat()
-        addon_prefs.success_msg = 'Token correctement récupéré !'
-        addon_prefs.token = token_data['access_token']
-        addon_prefs.refresh_token = token_data['refresh_token']
-        addon_prefs.expire_token = expire_token
-        FBlenderProfile.ACCESS_TOKEN = token_data['access_token']
-        FBlenderProfile.REFRESH_TOKEN = token_data['refresh_token']
-        FBlenderProfile.EXPIRE_TOKEN = expire_token
+        try:
+            token_data = drb.get_access_token()
+            print('token data is : ', token_data)
+            expire_token_obj = next_expire_time(token_data['expires_in'])
+            expire_token = expire_token_obj.isoformat()
+            addon_prefs.success_msg = 'Token correctement récupéré !'
+            addon_prefs.token = token_data['access_token']
+            addon_prefs.refresh_token = token_data['refresh_token']
+            addon_prefs.expire_token = expire_token
+            FBlenderProfile.ACCESS_TOKEN = token_data['access_token']
+            FBlenderProfile.REFRESH_TOKEN = token_data['refresh_token']
+            FBlenderProfile.EXPIRE_TOKEN = expire_token
+            self.report({'INFO'}, 'Login success')
+        except DropboxError as error:
+            addon_prefs.error_msg = f"Une erreur c'est produite ! \n{error}"
+            addon_prefs.token = 'NOT-SET'
+            addon_prefs.refresh_token = ''
+            addon_prefs.expire_token = ''
+            FBlenderProfile.ACCESS_TOKEN = ''
+            FBlenderProfile.REFRESH_TOKEN = ''
+            FBlenderProfile.EXPIRE_TOKEN = ''
+            self.report({'ERROR'}, f'Login failed {error}')
+
         FBlenderProfile.save_profiles_data()
-
-
-        self.report({'INFO'}, 'Login success')
 
         return {'FINISHED'}

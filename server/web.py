@@ -36,7 +36,6 @@ def wait_authorization_code(socket_proc: socket.socket) -> str:
 
     query = urlparse(url).query
     params = parse_qs(query)
-    print('url params -> ', params)
     param_code = params.get('code', [])
 
     conn.sendall(b'HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body><h1>Vous pouvez fermer cette page !</h1></body></html>')

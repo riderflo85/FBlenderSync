@@ -8,7 +8,9 @@ FR = (
     ('FB-Success-Write-Pref', 'Enregistrement du profil avec succès !'),
     ('Ms-Not-Token', 'Application Dropbox pas encore connectée.'),
     ('Ms-Valide-Token', 'Votre token est encore valide.'),
+    ('Ms-Expired-Token', 'Votre token est expiré.'),
     ('Ms-Token-Expires-In', 'Expiration du token le'),
+    ('Ms-Token-Expires-Out', 'Votre token a expiré le'),
 )
 
 
