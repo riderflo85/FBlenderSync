@@ -125,7 +125,6 @@ class FBlenderSyncLoginDropbox(FContextMixin, Operator):
         bpy.context.window.cursor_set('WAIT')
         try:
             token_data = drb.get_access_token()
-            print('token data is : ', token_data)
             expire_token_obj = next_expire_time(token_data['expires_in'])
             expire_token = expire_token_obj.isoformat()
             addon_prefs.success_msg = 'Token correctement récupéré !'

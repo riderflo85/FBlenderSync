@@ -162,3 +162,4 @@ cython_debug/
 # Custom ignore
 env.json
 .vscode
+to_ignore/

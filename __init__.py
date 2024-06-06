@@ -19,10 +19,13 @@ if 'preference' in locals():
     preference = importlib.reload(preference)
     profiles = importlib.reload(profiles)
     mixins = importlib.reload(mixins)
+    menu = importlib.reload(menu)
     FBlenderSyncPreferences = preference.FBlenderSyncPreferences
     FBlenderSyncLoginDropbox = preference.FBlenderSyncLoginDropbox
     FBlenderSyncSaveSettings = preference.FBlenderSyncSaveSettings
     FContextMixin = mixins.FContextMixin
+    register_menu = menu.register
+    unregister_menu = menu.unregister
 
 else:
     from .profiles import make_profiles_path
@@ -31,6 +34,8 @@ else:
     from .preference import FBlenderSyncLoginDropbox
     from .preference import FBlenderSyncSaveSettings
     from .mixins import FContextMixin
+    from .menu import register as register_menu
+    from .menu import unregister as unregister_menu
 
 
 klass = (
@@ -56,11 +61,13 @@ def register():
     preferences.refresh_token = FBlenderProfile.REFRESH_TOKEN or 'NOT-SET'
     preferences.expire_token = FBlenderProfile.EXPIRE_TOKEN or 'NOT-SET'
 
+    register_menu()
 
 
 def unregister():
     for kls in klass:
         bpy.utils.unregister_class(kls)
+    unregister_menu()
 
 
 if __name__ == "__main__":
