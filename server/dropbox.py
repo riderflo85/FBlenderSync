@@ -32,10 +32,13 @@ class DropboxError(Exception):
 
 class DropboxAPI:
 
-    def __init__(self, app_key: str, app_secret: str) -> None:
+    def __init__(self, app_key: str, app_secret: str, in_blender: bool=False, **kwargs) -> None:
         self.app_key = app_key
         self.app_secret = app_secret
         self.oauth_code = ''
+        self.in_blender = in_blender
+        self.fbl_profile_klass = kwargs.get('fbl_profile_klass', False)
+        self.bl_preferences = kwargs.get('bl_preferences', False)
 
     def _authorization_app(self):
         """
@@ -141,11 +144,10 @@ class DropboxAPI:
 
     def refresh_api_token(self):
         """Refresh the access token"""
-        config = load_json_config(CONFIG_FILE)
         url = f'{DRB_API}/oauth2/token'
         payload = {
             'grant_type': 'refresh_token',
-            'refresh_token': config['REFRESH_TOKEN'],
+            'refresh_token': self.bl_preferences.refresh_token if self.in_blender else load_json_config(CONFIG_FILE)['REFRESH_TOKEN'],
             'client_id': self.app_key,
             'client_secret': self.app_secret
         }
@@ -158,9 +160,18 @@ class DropboxAPI:
                 'ACCESS_TOKEN': data['access_token'],
                 'TOKEN_END_VALIDATION': end_validation
             }
-            os.environ['ACCESS_TOKEN'] = data['access_token']
-            os.environ['TOKEN_END_VALIDATION'] = end_validation.isoformat()
-            write_json_config(CONFIG_FILE, config, to_update_config)
+            expire_token = end_validation.isoformat()
+            if self.in_blender:
+                self.fbl_profile_klass.ACCES_TOKEN = data['access_token']
+                self.fbl_profile_klass.EXPIRE_TOKEN = expire_token
+                self.fbl_profile_klass.save_profiles_data()
+                self.bl_preferences.token = data['access_token']
+                self.bl_preferences.expire_token = expire_token
+            else:
+                config = load_json_config(CONFIG_FILE)
+                os.environ['ACCESS_TOKEN'] = data['access_token']
+                os.environ['TOKEN_END_VALIDATION'] = expire_token
+                write_json_config(CONFIG_FILE, config, to_update_config)
             return data['access_token']
         else:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
