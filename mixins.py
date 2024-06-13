@@ -39,15 +39,18 @@ class FContextMixin:
         splited_path.pop(0)
         ui_item.indent_level = len(splited_path) - 1
 
+    @staticmethod
+    def _set_items_index(collection):
+        for index, item in enumerate(collection):
+            item.index = index
+
     def add_ui_list_with_dropbox_data(self, drb_data: dict, context):
-        # ctx_count_drp = len(context.scene.custom_items)
         new_items = []
         for data in drb_data:
             new_item = context.scene.custom_items.add()
             self.attribute_data(new_item, data)
             new_items.append(new_item)
-            # new_items.index = ctx_count_drp
-            # ctx_count_drp += 1
+        self._set_items_index(context.scene.custom_items)
         return new_items
 
     def move_ui_items(self, moving_items: list, insert_in: int, items, parent):
@@ -59,6 +62,7 @@ class FContextMixin:
             if item_index >= 0:
                 items.move(item_index, next_index)
                 next_index += 1
+        self._set_items_index(items)
 
 
 class FDropBoxMixin(FContextMixin):

@@ -2,6 +2,7 @@ import bpy, time
 from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty
 
 from .mixins import FMenuMixin, FDropBoxMixin
+from .history import MenuOperatorHistory, OperatorHistoryType
 
 
 class Item(bpy.types.PropertyGroup):
@@ -20,7 +21,7 @@ class Item(bpy.types.PropertyGroup):
     children_as_requested: BoolProperty(name="If children as requested or not", default=False)
     parent_id: StringProperty(name="Folder parent")
     indent_level: IntProperty(name="Indentation", default=0)
-    # index: IntProperty(name="Index in collection", default=-1)
+    index: IntProperty(name="Index in collection", default=-1)
 
 
 class ItemUIList(bpy.types.UIList):
@@ -36,29 +37,38 @@ class ItemUIList(bpy.types.UIList):
         section_2.alignment = 'RIGHT'
 
         row = section_1
-        row.separator()
 
         if item.indent_level:
             for _ in range(item.indent_level):
                 row.label(icon='BLANK1')
 
         if item.is_folder:
-            child_op = row.operator(GetSubMenu.bl_idname, text="", emboss=False, icon='TRIA_DOWN' if item.is_expanded else 'TRIA_RIGHT')
+            child_op = row.operator(FolderContentOpMenu.bl_idname, text="", emboss=False, icon='TRIA_DOWN' if item.is_expanded else 'TRIA_RIGHT')
             child_op.item_ui_list_index = index
 
         row.label(
             text=item.name,
             icon="FILE_FOLDER" if item.is_folder else "FILE_BLANK",
         )
-        # row.label(text=item.id)
 
 
-class GetSubMenu(FDropBoxMixin, bpy.types.Operator):
-    """Create the new button with API data response"""
-    bl_idname = "fblender_sync.create_button"
-    bl_label = "Get the content sub menu Dropbox"
+class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
+    """Request the Dropbox cloud to get the content of folder"""
+    bl_idname = "fblender_sync.folder_content_op_menu"
+    bl_label = "Content of folder"
     
     item_ui_list_index: IntProperty(name="Index of folder")
+
+    def _get_childs(self, folder: Item, find_in: CollectionProperty):
+        childrens = []
+        for item in find_in:
+            if item.id == folder.id or item.index < self.item_ui_list_index:
+                continue
+            if item.indent_level == folder.indent_level:
+                break
+            if item.indent_level > folder.indent_level:
+                childrens.append({"name": item.name, "data": item})
+        return childrens
 
     def execute(self, context):
         folder = context.scene.custom_items[self.item_ui_list_index]
@@ -74,7 +84,18 @@ class GetSubMenu(FDropBoxMixin, bpy.types.Operator):
                 parent=folder,
             )
             folder.children_as_requested = True
+        if folder.is_expanded:
+            history_op = MenuOperatorHistory(
+                OperatorHistoryType.FOLDING,
+                folder.id,
+                self.item_ui_list_index,
+                self._get_childs(folder, context.scene.custom_items),
+                context.scene.custom_items,
+            )
+            history_op.exec_callback()
+            context.scene.menu_history.append(history_op)
         folder.is_expanded = not folder.is_expanded
+        
         # print("res SubMenu : ", res)
         return {'FINISHED'}
 
@@ -152,7 +173,7 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
 def register():
     bpy.utils.register_class(Item)
     bpy.utils.register_class(ItemUIList)
-    bpy.utils.register_class(GetSubMenu)
+    bpy.utils.register_class(FolderContentOpMenu)
     bpy.utils.register_class(GetCloudButton)
     bpy.utils.register_class(UploadCurrentFile)
     bpy.utils.register_class(MyMenu)
@@ -182,7 +203,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(Item)
     bpy.utils.unregister_class(ItemUIList)
-    bpy.utils.unregister_class(GetSubMenu)
+    bpy.utils.unregister_class(FolderContentOpMenu)
     bpy.utils.unregister_class(GetCloudButton)
     bpy.utils.unregister_class(UploadCurrentFile)
     bpy.utils.unregister_class(MyMenu)
