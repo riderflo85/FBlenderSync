@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import bpy, time
 from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty
 
@@ -67,7 +69,7 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
             if item.indent_level == folder.indent_level:
                 break
             if item.indent_level > folder.indent_level:
-                childrens.append({"name": item.name, "data": item})
+                childrens.append({k: v for k, v in item.items()})
         return childrens
 
     def execute(self, context):
@@ -84,19 +86,38 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
                 parent=folder,
             )
             folder.children_as_requested = True
+            folder.is_expanded = not folder.is_expanded
+            return {'FINISHED'}
+
         if folder.is_expanded:
             history_op = MenuOperatorHistory(
-                OperatorHistoryType.FOLDING,
-                folder.id,
-                self.item_ui_list_index,
-                self._get_childs(folder, context.scene.custom_items),
-                context.scene.custom_items,
+                type=OperatorHistoryType.FOLDING,
+                item_id=folder.id,
+                item_index=self.item_ui_list_index,
+                childs=self._get_childs(folder, context.scene.custom_items),
+                collection=context.scene.custom_items,
+                timestamp=datetime.now(),
+            )
+            history_op.exec_callback()
+            context.scene.menu_history.append(history_op)
+        else:
+            history_op_objs = [
+                op for op in context.scene.menu_history
+                if op.item_id == folder.id and op.op_datetime < datetime.now()
+            ]
+            history_op_objs.sort(key=lambda i: i.op_datetime, reverse=True)
+            last_operation = history_op_objs[0]
+            history_op = MenuOperatorHistory(
+                type=OperatorHistoryType.UNFOLDING,
+                item_id=folder.id,
+                item_index=self.item_ui_list_index,
+                childs=last_operation.childrens,
+                collection=context.scene.custom_items,
+                timestamp=datetime.now(),
             )
             history_op.exec_callback()
             context.scene.menu_history.append(history_op)
         folder.is_expanded = not folder.is_expanded
-        
-        # print("res SubMenu : ", res)
         return {'FINISHED'}
 
 
@@ -112,7 +133,6 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
         bpy.context.window.cursor_set("DEFAULT")
         if len(context.scene.custom_items) > 0:
             context.scene.custom_items.clear()
-        print("response get folder API : ", res)
         self.add_ui_list_with_dropbox_data(res, context)
         return {'FINISHED'}
 
@@ -181,23 +201,6 @@ def register():
 
     bpy.types.Scene.custom_items = CollectionProperty(type=Item)
     bpy.types.Scene.custom_items_index = IntProperty(name="Index for custom_items", default=-1)
-    # for index, folder in enumerate(folders):
-    #     id_name = "fblender_sync.menu.%s" % index
-
-    #     new_menu = type(
-    #         "MyMenu%s" % index,
-    #         (bpy.types.Panel, ),
-    #         {
-    #             "bl_idname": id_name,
-    #             "bl_label": folder[1],
-    #             "bl_category": "Test Florent",
-    #             "bl_space_type": 'VIEW_3D',
-    #             "bl_region_type": 'UI',
-    #             "button_label": folder[0],
-    #             "draw": draw
-    #         }
-    #     )
-    #     bpy.utils.register_class(new_menu)
 
 # Supprimer le menu personnalisé
 def unregister():

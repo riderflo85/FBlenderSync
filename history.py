@@ -3,11 +3,9 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 from bpy.props import CollectionProperty
-from bpy import types, context
+from bpy import types
 
 from .mixins import FContextMixin
-
-bpy_context = context
 
 
 class OperatorHistoryType(Enum):
@@ -19,22 +17,13 @@ class MenuOperatorHistory(FContextMixin):
     """Create a history for all menu operator like expand a folder to show
     childrens.
     """
-
-    op_type: OperatorHistoryType
-    op_datetime: datetime
-    item_id: str
-    item_index: int
-    is_folder: bool
-    childrens: List[Dict[str, Any]] # [{"name": Toto, "data": Item object},]
-    # menu_data: CollectionProperty
-
     def __init__(self,
         type: OperatorHistoryType,
         item_id: str,
         item_index: int,
         childs: List[Dict[str, Any]],
         collection: CollectionProperty,
-        timestamp: datetime=datetime.now(),
+        timestamp: datetime,
         is_folder: bool=True,
     ) -> None:
         self.op_type = type
@@ -46,15 +35,23 @@ class MenuOperatorHistory(FContextMixin):
         self.collection = collection
 
     def _remove_items_in_bpy_context(self):
-        collection = self.collection
         for child in self.childrens:
-            # La collection subit une mutation et les index ne sont donc plus correct.
-            child_index = collection.find(child["name"])
-            collection.remove(child_index)
-        self._set_items_index(collection)
-    
+            # The collection has been mutated and the indexes are no longer correct.
+            child_index = self.collection.find(child["name"])
+            self.collection.remove(child_index)
+        self._set_items_index(self.collection)
+
     def _reset_items_in_bpy_context(self):
-        pass
+        for index, child in enumerate(self.childrens):
+            restore_item = self.collection.add()
+            for key, value in child.items():
+                if key == "index":
+                    continue
+                setattr(restore_item, key, value)
+            last_index = len(self.collection) - 1
+            insert_in = self.item_index + index + 1
+            self.collection.move(last_index, insert_in)
+        self._set_items_index(self.collection)
 
     def exec_callback(self):
         if self.op_type == OperatorHistoryType.FOLDING:
@@ -64,12 +61,8 @@ class MenuOperatorHistory(FContextMixin):
 
 
 def register():
-    # utils.register_class(MenuOperatorHistory)
-    
     types.Scene.menu_history = []
 
 
 def unregister():
-    # utils.unregister_class(MenuOperatorHistory)
-    
     del types.Scene.menu_history
