@@ -28,30 +28,79 @@ class Item(bpy.types.PropertyGroup):
 
 class ItemUIList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        column = layout.column(align=True)
+        main_column = layout.column()
 
-        main_row = column.row()
+        btn_column = layout.column()
 
-        section_1 = main_row.row(align=True)
-        section_1.alignment = 'LEFT'
+        row = main_column.row(align=True)
 
-        section_2 = main_row.row(align=True)
-        section_2.alignment = 'RIGHT'
+        row_btn = btn_column.row()
 
-        row = section_1
-
-        if item.indent_level:
-            for _ in range(item.indent_level):
-                row.label(icon='BLANK1')
+        for _ in range(item.indent_level):
+            row.label(icon='BLANK1')
 
         if item.is_folder:
-            child_op = row.operator(FolderContentOpMenu.bl_idname, text="", emboss=False, icon='TRIA_DOWN' if item.is_expanded else 'TRIA_RIGHT')
+            child_op = row.operator(
+                FolderContentOpMenu.bl_idname,
+                text="",
+                emboss=False,
+                icon='TRIA_DOWN' if item.is_expanded else 'TRIA_RIGHT',
+            )
             child_op.item_ui_list_index = index
+
+            refresh_op = row_btn.operator(
+                RefreshFolderContent.bl_idname,
+                text="",
+                # emboss=False,
+                icon="FILE_REFRESH",
+            )
+            refresh_op.item_ui_list_index = index
+
+        else:
+            row_btn.label(text="", icon="IMPORT")
 
         row.label(
             text=item.name,
             icon="FILE_FOLDER" if item.is_folder else "FILE_BLANK",
         )
+
+
+class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
+    """Refresh the folder content with Dropbox API request response"""
+    bl_idname = "fblender_sync.refresh_folder_content"
+    bl_label = "Refresh folder content"
+    
+    item_ui_list_index: IntProperty(name="Index of folder")
+    
+    def execute(self, context):
+        folder = context.scene.custom_items[self.item_ui_list_index]
+        
+        bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
+        res = self.get_cloud(context, folder.path_lower)
+        bpy.context.window.cursor_set("DEFAULT")
+        
+        if folder.is_expanded:
+            childrens = self.get_childs(folder, self.item_ui_list_index, context.scene.custom_items)
+            history_op = MenuOperatorHistory(
+                type=OperatorHistoryType.REFRESH,
+                item_id=folder.id,
+                item_index=self.item_ui_list_index,
+                childs=childrens,
+                collection=context.scene.custom_items,
+                timestamp=datetime.now(),
+            )
+            history_op.exec_callback()
+        
+        new_items = self.add_ui_list_with_dropbox_data(res, context)
+        self.move_ui_items(
+            moving_items=new_items,
+            insert_in=self.item_ui_list_index+1,
+            items=context.scene.custom_items,
+            parent=folder,
+        )
+        folder.children_as_requested = True
+        folder.is_expanded = True
+        return {'FINISHED'}
 
 
 class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
@@ -60,17 +109,6 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
     bl_label = "Content of folder"
     
     item_ui_list_index: IntProperty(name="Index of folder")
-
-    def _get_childs(self, folder: Item, find_in: CollectionProperty):
-        childrens = []
-        for item in find_in:
-            if item.id == folder.id or item.index < self.item_ui_list_index:
-                continue
-            if item.indent_level == folder.indent_level:
-                break
-            if item.indent_level > folder.indent_level:
-                childrens.append({k: v for k, v in item.items()})
-        return childrens
 
     def execute(self, context):
         folder = context.scene.custom_items[self.item_ui_list_index]
@@ -90,11 +128,12 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
             return {'FINISHED'}
 
         if folder.is_expanded:
+            childrens = self.get_childs(folder, self.item_ui_list_index, context.scene.custom_items)
             history_op = MenuOperatorHistory(
                 type=OperatorHistoryType.FOLDING,
                 item_id=folder.id,
                 item_index=self.item_ui_list_index,
-                childs=self._get_childs(folder, context.scene.custom_items),
+                childs=childrens,
                 collection=context.scene.custom_items,
                 timestamp=datetime.now(),
             )
@@ -193,6 +232,7 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
 def register():
     bpy.utils.register_class(Item)
     bpy.utils.register_class(ItemUIList)
+    bpy.utils.register_class(RefreshFolderContent)
     bpy.utils.register_class(FolderContentOpMenu)
     bpy.utils.register_class(GetCloudButton)
     bpy.utils.register_class(UploadCurrentFile)
@@ -206,6 +246,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(Item)
     bpy.utils.unregister_class(ItemUIList)
+    bpy.utils.unregister_class(RefreshFolderContent)
     bpy.utils.unregister_class(FolderContentOpMenu)
     bpy.utils.unregister_class(GetCloudButton)
     bpy.utils.unregister_class(UploadCurrentFile)

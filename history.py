@@ -11,6 +11,7 @@ from .mixins import FContextMixin
 class OperatorHistoryType(Enum):
     UNFOLDING = "unfolding_folder"
     FOLDING = "folding_folder"
+    REFRESH = "refresh_folder"
 
 
 class MenuOperatorHistory(FContextMixin):
@@ -54,7 +55,7 @@ class MenuOperatorHistory(FContextMixin):
         self._set_items_index(self.collection)
 
     def exec_callback(self):
-        if self.op_type == OperatorHistoryType.FOLDING:
+        if self.op_type in (OperatorHistoryType.FOLDING, OperatorHistoryType.REFRESH):
             self._remove_items_in_bpy_context()
         elif self.op_type == OperatorHistoryType.UNFOLDING:
             self._reset_items_in_bpy_context()

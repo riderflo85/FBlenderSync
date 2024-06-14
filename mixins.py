@@ -1,3 +1,5 @@
+from bpy.props import CollectionProperty
+
 from .statics import APP_NAME
 from .server import DropboxAPI
 from .profiles import FBlenderProfile
@@ -44,6 +46,18 @@ class FContextMixin:
         for index, item in enumerate(collection):
             item.index = index
 
+    @staticmethod
+    def get_childs(folder, folder_index: int, find_in: CollectionProperty):
+        childrens = []
+        for item in find_in:
+            if item.id == folder.id or item.index < folder_index:
+                continue
+            if item.indent_level == folder.indent_level:
+                break
+            if item.indent_level > folder.indent_level:
+                childrens.append({k: v for k, v in item.items()})
+        return childrens
+
     def add_ui_list_with_dropbox_data(self, drb_data: dict, context):
         new_items = []
         for data in drb_data:
@@ -53,7 +67,7 @@ class FContextMixin:
         self._set_items_index(context.scene.custom_items)
         return new_items
 
-    def move_ui_items(self, moving_items: list, insert_in: int, items, parent):
+    def move_ui_items(self, moving_items: list, insert_in: int, items: CollectionProperty, parent):
         # Utiliser items.find avec item.name https://docs.blender.org/api/3.6/bpy.types.bpy_prop_collection.html#bpy.types.bpy_prop_collection.find
         next_index = insert_in
         for item in moving_items:
