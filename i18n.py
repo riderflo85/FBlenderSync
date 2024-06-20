@@ -11,6 +11,15 @@ FR = (
     ('Ms-Expired-Token', 'Votre token est expiré.'),
     ('Ms-Token-Expires-In', 'Expiration du token le'),
     ('Ms-Token-Expires-Out', 'Votre token a expiré le'),
+    ('FMRI-DRB-desc', 'Le fichier est plus récent sur Dropbox.'),
+    ('FMRI-Local-desc', 'Le fichier est plus récent sur cet ordinateur.'),
+    ('FMRI-MissingLocal-desc', 'Le fichier n\'est pas présent sur cet ordinateur.'),
+)
+
+EN = (
+    ('FMRI-DRB-desc', 'The file is more recent on Dropbox.'),
+    ('FMRI-Local-desc', 'The file is more recent on this computer.'),
+    ('FMRI-MissingLocal-desc', 'The file is not present on this computer.'),
 )
 
 

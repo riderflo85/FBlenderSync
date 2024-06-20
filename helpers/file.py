@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 
 def write_file(path_file_name: str, bytes_content: bytes):
@@ -26,3 +27,13 @@ def check_local_path_file(path_file_name: str):
         path_file_name (str): local path file
     """
     return os.path.isfile(path_file_name)
+
+
+def get_modified_date_file(path_file: str):
+    """Return the modified date of the local file.
+
+    Args:
+        path_file (str): local path file
+    """
+    timestamp = os.path.getmtime(path_file)
+    return datetime.fromtimestamp(timestamp)

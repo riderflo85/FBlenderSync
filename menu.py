@@ -3,7 +3,10 @@ from datetime import datetime
 import bpy, time
 from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty
 
-from .mixins import FMenuMixin, FDropBoxMixin
+from .helpers import get_modified_date_file
+from .helpers import check_local_path_file
+from .settings import FileMoreRecentIn
+from .mixins import FMenuMixin, FDropBoxMixin, FContextMixin
 from .history import MenuOperatorHistory, OperatorHistoryType
 
 
@@ -27,12 +30,43 @@ class Item(bpy.types.PropertyGroup):
 
 
 class ItemUIList(bpy.types.UIList):
+    @staticmethod
+    def _must_updated(context, item):
+        try:
+            # For python v3.11 and later
+            client_modified_datetime = datetime.fromisoformat(item.client_modified)
+            server_modified_datetime = datetime.fromisoformat(item.server_modified)
+        except ValueError:
+            # For python before v3.11
+            client_modified_datetime = datetime.fromisoformat(
+                item.client_modified.replace("Z", "")
+            )
+            server_modified_datetime = datetime.fromisoformat(
+                item.server_modified.replace("Z", "")
+            )
+        item_modified_at = max(client_modified_datetime, server_modified_datetime)
+
+        addon_prefs = FContextMixin.addon_prefs(context)
+        root_prefix = addon_prefs.local_filepath
+
+        local_file_path = f"{root_prefix}{item.path_lower}"
+        local_file_modified_at = get_modified_date_file(local_file_path)
+
+        if local_file_modified_at > item_modified_at:
+            return FileMoreRecentIn.LOCAL["value"]
+        else:
+            return FileMoreRecentIn.DRB["value"]
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         main_column = layout.column()
+
+        file_state_column = layout.column()
 
         btn_column = layout.column()
 
         row = main_column.row(align=True)
+
+        row_file_state = file_state_column.row()
 
         row_btn = btn_column.row()
 
@@ -57,6 +91,17 @@ class ItemUIList(bpy.types.UIList):
             refresh_op.item_ui_list_index = index
 
         else:
+            addon_prefs = FContextMixin.addon_prefs(context)
+            root_prefix = addon_prefs.local_filepath
+            item_in_local = check_local_path_file(f"{root_prefix}{item.path_lower}")
+
+            if item_in_local:
+                version_state_icon = self._must_updated(context, item)["icon"]
+            else:
+                version_state_icon = FileMoreRecentIn.MISSING_LOCAL.value["icon"]
+
+            row_file_state.label(text="", icon=version_state_icon)
+
             row_btn.label(text="", icon="IMPORT")
 
         row.label(
@@ -226,6 +271,12 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
 
         row = layout.row()
         row.template_list("ItemUIList", "", scene, "custom_items", scene, "custom_items_index")
+        
+        col = layout.column()
+        col.separator()
+
+        for state in FileMoreRecentIn.values():
+            col.label(text=state["description"], icon=state["icon"])
 
 
 # Enregistrer le menu personnalisé
