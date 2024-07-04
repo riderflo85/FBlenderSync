@@ -11,6 +11,7 @@ from .operators import UploadCurrentFile
 from .operators import FolderContentOpMenu
 from .operators import RefreshFolderContent
 from .operators import GetCloudButton
+from .operators import DownloadFileOperator
 
 
 class Item(bpy.types.PropertyGroup):
@@ -56,9 +57,9 @@ class ItemUIList(bpy.types.UIList):
         local_file_modified_at = get_modified_date_file(local_file_path)
 
         if local_file_modified_at > item_modified_at:
-            return FileMoreRecentIn.LOCAL["value"]
+            return FileMoreRecentIn.LOCAL.value
         else:
-            return FileMoreRecentIn.DRB["value"]
+            return FileMoreRecentIn.DRB.value
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         main_column = layout.column()
@@ -105,7 +106,12 @@ class ItemUIList(bpy.types.UIList):
 
             row_file_state.label(text="", icon=version_state_icon)
 
-            row_btn.label(text="", icon="IMPORT")
+            download_file_op = row_btn.operator(
+                DownloadFileOperator.bl_idname,
+                text="",
+                icon="IMPORT"
+            )
+            download_file_op.file_drb_path = item.path_display
 
         row.label(
             text=item.name,
@@ -157,6 +163,12 @@ def register():
 
     bpy.types.Scene.custom_items = CollectionProperty(type=Item)
     bpy.types.Scene.custom_items_index = IntProperty(name="Index for custom_items", default=-1)
+
+    # if not bpy.context.scene.get("metadata", False):
+    #     bpy.context.scene["metadata"] = {
+    #         "scene_version": 1,
+    #     }
+
 
 # Supprimer le menu personnalisé
 def unregister():

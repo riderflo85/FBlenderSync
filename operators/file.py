@@ -4,6 +4,7 @@ import bpy
 from bpy.props import StringProperty
 
 from ..mixins import FDropBoxMixin
+from ..helpers import write_file, check_or_create_local_root_path
 
 
 class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
@@ -20,6 +21,29 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
             context.scene.custom_items.clear()
         self.add_ui_list_with_dropbox_data(res, context)
         return {'FINISHED'}
+
+
+class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
+    bl_idname = "fblender_sync.download_file"
+    bl_label = "Download this Dropbox file"
+
+    file_drb_path: StringProperty(name="File path to DropBox cloud", default="")
+
+    def execute(self, context):
+        bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
+        file_infos, file_bytes = self.dl_file(context, self.file_drb_path)
+        path_sync_folder = self.addon_prefs(context).local_filepath
+        file_path_name = f"{path_sync_folder}{self.file_drb_path}"
+        file_path_name = file_path_name.replace("//", "/")
+        bpy.context.window.cursor_set("DEFAULT")
+        root_path_file = file_path_name.replace(file_infos.get("name"), "")
+        check_or_create_local_root_path(root_path_file)
+        file_is_writed = write_file(file_path_name, file_bytes)
+        if file_is_writed:
+            self.report({"INFO"}, "Successfuly writed file !")
+        else:
+            self.report({"ERROR"}, "Error with wirted file !")
+        return {"FINISHED"}
 
 
 class UploadCurrentFile(bpy.types.Operator):
@@ -46,10 +70,12 @@ class UploadCurrentFile(bpy.types.Operator):
 
 
 def register():
+    bpy.utils.register_class(DownloadFileOperator)
     bpy.utils.register_class(UploadCurrentFile)
     bpy.utils.register_class(GetCloudButton)
 
 def unregister():
+    bpy.utils.unregister_class(DownloadFileOperator)
     bpy.utils.unregister_class(UploadCurrentFile)
     bpy.utils.unregister_class(GetCloudButton)
 

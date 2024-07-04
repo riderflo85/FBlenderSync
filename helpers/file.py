@@ -12,21 +12,30 @@ def write_file(path_file_name: str, bytes_content: bytes):
     with open(path_file_name, 'wb') as file_obj:
         file_obj.write(bytes_content)
 
-    if os.path.isfile(path_file_name):
-        #TODO Voir si c'est possible de mettre des messages de succès dans Blender
-        print('FILE IS WRITED !!!')
-    else:
-        #TODO Renvoyer l'erreur dans l'interface de blender !!!
-        print('FILE IS NOT WRITED !!!')
+    return check_local_path_file(path_file_name)
 
 
-def check_local_path_file(path_file_name: str):
+def check_local_path_file(path_file_name: str) -> bool:
     """Check if local path file is exist or not.
 
     Args:
         path_file_name (str): local path file
     """
     return os.path.isfile(path_file_name)
+
+
+def check_or_create_local_root_path(root_path: str) -> bool:
+    """Check if local root path is exist or not.
+    If root path does not exist this method create it.
+
+    Args:
+        root_path (str): _description_
+    """
+    if not os.path.exists(root_path):
+        os.makedirs(root_path)
+        return True
+    else:
+        return True
 
 
 def get_modified_date_file(path_file: str):

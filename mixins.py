@@ -90,3 +90,15 @@ class FDropBoxMixin(FContextMixin):
             bl_preferences=addon_prefs,
         )
         return drb.get_content_folder(addon_prefs.token, path)
+
+    def dl_file(self, context, drb_path):
+        addon_prefs = self.addon_prefs(context)
+        drb = DropboxAPI(
+            app_key=addon_prefs.dropbox_app_key,
+            app_secret=addon_prefs.dropbox_app_secret,
+            in_blender=True,
+            fbl_profile_klass=FBlenderProfile,
+            bl_preferences=addon_prefs,
+        )
+        return drb.download_file(addon_prefs.token, drb_path)
+        

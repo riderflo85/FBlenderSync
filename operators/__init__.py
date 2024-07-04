@@ -1,5 +1,6 @@
 from .file import GetCloudButton
 from .file import UploadCurrentFile
+from .file import DownloadFileOperator
 from .file import register as file_register
 from .file import unregister as file_unregister
 from .folder import RefreshFolderContent
