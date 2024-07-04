@@ -22,6 +22,7 @@ if 'preference' in locals():
     menu = importlib.reload(menu)
     history = importlib.reload(history)
     operators = importlib.reload(operators)
+    # handlers = importlib.reload(handlers)
     FBlenderSyncPreferences = preference.FBlenderSyncPreferences
     FBlenderSyncLoginDropbox = preference.FBlenderSyncLoginDropbox
     FBlenderSyncSaveSettings = preference.FBlenderSyncSaveSettings
@@ -46,6 +47,7 @@ else:
     from .history import unregister as unregister_history
     from .operators import register as register_operators
     from .operators import unregister as unregister_operators
+    # from .handlers import pre_save_handler
 
 
 klass = (
@@ -54,10 +56,17 @@ klass = (
     FBlenderSyncSaveSettings,
 )
 
+# functions = (
+#     pre_save_handler,
+# )
+
 def register():
     make_profiles_path()
     # profiles_data = profiles.get_profiles_data(profiles_path, profiles_file)
     FBlenderProfile.read_json()
+
+    # for klfs in klass + functions:
+    #     bpy.utils.register_class(klfs)
 
     for kls in klass:
         bpy.utils.register_class(kls)
@@ -77,6 +86,8 @@ def register():
 
 
 def unregister():
+    # for klfs in klass + functions:
+    #     bpy.utils.unregister_class(klfs)
     for kls in klass:
         bpy.utils.unregister_class(kls)
     unregister_history()
