@@ -124,16 +124,12 @@ class MyMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Menu principal"
     bl_idname = "fblender_sync.menu"
 
-    button_label = "" # TEST Upload
-
     def draw(self, context):
         layout = self.layout
 
         # Ajouter des éléments de menu
         layout.operator(UploadCurrentFile.bl_idname, text="Envoyer le fichier actuel")
         layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud")
-        if self.button_label:
-            layout.operator(UploadCurrentFile.bl_idname, text=self.button_label)
 
 
 class ExplorerMenu(FMenuMixin, bpy.types.Panel):
@@ -142,10 +138,10 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
     
     def draw(self, context):
         layout = self.layout
-        scene = context.scene
+        wm = context.window_manager
 
         row = layout.row()
-        row.template_list("ItemUIList", "", scene, "custom_items", scene, "custom_items_index")
+        row.template_list("ItemUIList", "", wm, "cloud_data", wm, "cloud_data_index")
         
         col = layout.column()
         col.separator()
@@ -161,14 +157,21 @@ def register():
     bpy.utils.register_class(MyMenu)
     bpy.utils.register_class(ExplorerMenu)
 
-    bpy.types.Scene.custom_items = CollectionProperty(type=Item)
-    bpy.types.Scene.custom_items_index = IntProperty(name="Index for custom_items", default=-1)
+    bpy.types.WindowManager.cloud_data = CollectionProperty(type=Item)
+    bpy.types.WindowManager.cloud_data_index = IntProperty(name="Index for cloud_data", default=-1)
 
     # if not bpy.context.scene.get("metadata", False):
     #     bpy.context.scene["metadata"] = {
     #         "scene_version": 1,
     #     }
 
+    if not hasattr(bpy.types.BlendData, "metadata"):
+        # metadata is custom property.
+        # Access it to bpy.data.metadata
+        # OR context.blend_data
+        bpy.types.BlendData.metadata = {
+            "file_version": 1
+        }
 
 # Supprimer le menu personnalisé
 def unregister():
@@ -177,8 +180,8 @@ def unregister():
     bpy.utils.unregister_class(MyMenu)
     bpy.utils.unregister_class(ExplorerMenu)
     
-    del bpy.types.Scene.custom_items
-    del bpy.types.Scene.custom_items_index
+    del bpy.types.WindowManager.cloud_data
+    del bpy.types.WindowManager.cloud_data_index
 
 
 # Exécuter l'enregistrement du menu lors de l'exécution du script

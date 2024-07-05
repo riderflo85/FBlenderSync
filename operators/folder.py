@@ -15,20 +15,21 @@ class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
     item_ui_list_index: IntProperty(name="Index of folder")
 
     def execute(self, context):
-        folder = context.scene.custom_items[self.item_ui_list_index]
+        wm = context.window_manager
+        folder = wm.cloud_data[self.item_ui_list_index]
 
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
         res = self.get_cloud(context, folder.path_lower)
         bpy.context.window.cursor_set("DEFAULT")
 
         if folder.is_expanded:
-            childrens = self.get_childs(folder, self.item_ui_list_index, context.scene.custom_items)
+            childrens = self.get_childs(folder, self.item_ui_list_index, wm.cloud_data)
             history_op = MenuOperatorHistory(
                 type=OperatorHistoryType.REFRESH,
                 item_id=folder.id,
                 item_index=self.item_ui_list_index,
                 childs=childrens,
-                collection=context.scene.custom_items,
+                collection=wm.cloud_data,
                 timestamp=datetime.now(),
             )
             history_op.exec_callback()
@@ -37,7 +38,7 @@ class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
         self.move_ui_items(
             moving_items=new_items,
             insert_in=self.item_ui_list_index+1,
-            items=context.scene.custom_items,
+            items=wm.cloud_data,
             parent=folder,
         )
         folder.children_as_requested = True
@@ -53,7 +54,8 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
     item_ui_list_index: IntProperty(name="Index of folder")
 
     def execute(self, context):
-        folder = context.scene.custom_items[self.item_ui_list_index]
+        wm = context.window_manager
+        folder = wm.cloud_data[self.item_ui_list_index]
         if not folder.children_as_requested:
             bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
             res = self.get_cloud(context, folder.path_lower)
@@ -62,7 +64,7 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
             self.move_ui_items(
                 moving_items=new_items,
                 insert_in=self.item_ui_list_index+1,
-                items=context.scene.custom_items,
+                items=wm.cloud_data,
                 parent=folder,
             )
             folder.children_as_requested = True
@@ -70,13 +72,13 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
             return {'FINISHED'}
 
         if folder.is_expanded:
-            childrens = self.get_childs(folder, self.item_ui_list_index, context.scene.custom_items)
+            childrens = self.get_childs(folder, self.item_ui_list_index, wm.cloud_data)
             history_op = MenuOperatorHistory(
                 type=OperatorHistoryType.FOLDING,
                 item_id=folder.id,
                 item_index=self.item_ui_list_index,
                 childs=childrens,
-                collection=context.scene.custom_items,
+                collection=wm.cloud_data,
                 timestamp=datetime.now(),
             )
             history_op.exec_callback()
@@ -93,7 +95,7 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
                 item_id=folder.id,
                 item_index=self.item_ui_list_index,
                 childs=last_operation.childrens,
-                collection=context.scene.custom_items,
+                collection=wm.cloud_data,
                 timestamp=datetime.now(),
             )
             history_op.exec_callback()

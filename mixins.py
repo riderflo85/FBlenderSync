@@ -60,11 +60,12 @@ class FContextMixin:
 
     def add_ui_list_with_dropbox_data(self, drb_data: dict, context):
         new_items = []
+        wm = context.window_manager
         for data in drb_data:
-            new_item = context.scene.custom_items.add()
+            new_item = wm.cloud_data.add()
             self.attribute_data(new_item, data)
             new_items.append(new_item)
-        self._set_items_index(context.scene.custom_items)
+        self._set_items_index(wm.cloud_data)
         return new_items
 
     def move_ui_items(self, moving_items: list, insert_in: int, items: CollectionProperty, parent):
