@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import bpy
-from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty
+from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty, EnumProperty, PointerProperty
 
 from .helpers import get_modified_date_file
 from .helpers import check_local_path_file
@@ -12,6 +12,39 @@ from .operators import FolderContentOpMenu
 from .operators import RefreshFolderContent
 from .operators import GetCloudButton
 from .operators import DownloadFileOperator
+
+
+def get_dynamique_cloud_folders(self, context):
+    wm = context.window_manager
+    available_cloud_folders_obj = wm.available_folders
+    available_cloud_folders = []
+    if not available_cloud_folders_obj:
+        return [
+            ("badId", "BadName", "BadDescription",)
+        ]
+    for cloud_folder in available_cloud_folders_obj:
+        available_cloud_folders.append(
+            (
+                cloud_folder.id,
+                cloud_folder.name,
+                cloud_folder.desc,
+            )
+        )
+    return available_cloud_folders
+
+class EnumFolderProperties(bpy.types.PropertyGroup):
+    id: StringProperty(name="id cloud")
+    name: StringProperty(name="folder name")
+    desc: StringProperty(name="description")
+
+
+class SaveOnCloudProperties(bpy.types.PropertyGroup):
+    folders: EnumProperty(
+        name="Dossier cible",
+        description="Available folders on cloud",
+        items=get_dynamique_cloud_folders,
+    )
+    # file_name: StringProperty(name="Current file name")
 
 
 class Item(bpy.types.PropertyGroup):
@@ -150,15 +183,36 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
             col.label(text=state["description"], icon=state["icon"])
 
 
+class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
+    bl_label = "Sauvegarde sur le cloud"
+    bl_idname = "fblender_sync.menu.save_on_cloud"
+
+    def draw(self, context):
+        layout = self.layout
+        wm = context.window_manager
+        
+        layout.label(text="Enregistrer le fichier actuel sur votre cloud")
+        col = layout.column()
+        col.separator()
+        
+        col.prop(wm.save_on_cloud, "folders")
+        col.label(text=wm.save_on_cloud.folders)
+
+
 # Enregistrer le menu personnalisé
 def register():
     bpy.utils.register_class(Item)
     bpy.utils.register_class(ItemUIList)
     bpy.utils.register_class(MyMenu)
     bpy.utils.register_class(ExplorerMenu)
+    bpy.utils.register_class(EnumFolderProperties)
+    bpy.utils.register_class(SaveOnCloudProperties)
+    bpy.utils.register_class(SaveOnCloudMenu)
 
     bpy.types.WindowManager.cloud_data = CollectionProperty(type=Item)
     bpy.types.WindowManager.cloud_data_index = IntProperty(name="Index for cloud_data", default=-1)
+    bpy.types.WindowManager.save_on_cloud = PointerProperty(type=SaveOnCloudProperties)
+    bpy.types.WindowManager.available_folders = CollectionProperty(type=EnumFolderProperties)
 
     # if not bpy.context.scene.get("metadata", False):
     #     bpy.context.scene["metadata"] = {
@@ -179,9 +233,14 @@ def unregister():
     bpy.utils.unregister_class(ItemUIList)
     bpy.utils.unregister_class(MyMenu)
     bpy.utils.unregister_class(ExplorerMenu)
+    bpy.utils.unregister_class(EnumFolderProperties)
+    bpy.utils.unregister_class(SaveOnCloudProperties)
+    bpy.utils.unregister_class(SaveOnCloudMenu)
     
     del bpy.types.WindowManager.cloud_data
     del bpy.types.WindowManager.cloud_data_index
+    del bpy.types.WindowManager.save_on_cloud
+    del bpy.types.WindowManager.available_folders
 
 
 # Exécuter l'enregistrement du menu lors de l'exécution du script

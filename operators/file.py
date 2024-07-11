@@ -20,6 +20,7 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
         wm = context.window_manager
         if len(wm.cloud_data) > 0:
             wm.cloud_data.clear()
+            wm.available_folders.clear()
         self.add_ui_list_with_dropbox_data(res, context)
         return {'FINISHED'}
 

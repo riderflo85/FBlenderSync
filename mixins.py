@@ -23,7 +23,7 @@ class FContextMixin:
         return addon_prefs
     
     @staticmethod
-    def attribute_data(ui_item, data: dict):
+    def attribute_data(ui_item, data: dict, new_av_folder=None):
         ui_item.tag = data[".tag"]
         ui_item.name = data["name"]
         ui_item.id = data["id"]
@@ -31,6 +31,9 @@ class FContextMixin:
         ui_item.path_display = data["path_display"]
         if data[".tag"] == "folder":
             ui_item.is_folder = True
+            new_av_folder.id = data["name"]
+            new_av_folder.name = data["path_display"]
+            new_av_folder.desc = data["path_lower"]
         elif data[".tag"] == "file":
             ui_item.client_modified = data["client_modified"]
             ui_item.server_modified = data["server_modified"]
@@ -63,7 +66,11 @@ class FContextMixin:
         wm = context.window_manager
         for data in drb_data:
             new_item = wm.cloud_data.add()
-            self.attribute_data(new_item, data)
+            if data[".tag"] == "folder":
+                new_available_folder = wm.available_folders.add()
+                self.attribute_data(new_item, data, new_av_folder=new_available_folder)
+            else:
+                self.attribute_data(new_item, data)
             new_items.append(new_item)
         self._set_items_index(wm.cloud_data)
         return new_items
