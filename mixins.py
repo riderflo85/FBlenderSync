@@ -6,9 +6,9 @@ from .profiles import FBlenderProfile
 
 
 class FMenuMixin:
-    bl_category = "Test Florent"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
+    bl_category = "Cloud service"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
 
 
 class FContextMixin:
@@ -31,9 +31,9 @@ class FContextMixin:
         ui_item.path_display = data["path_display"]
         if data[".tag"] == "folder":
             ui_item.is_folder = True
-            new_av_folder.id = data["name"]
+            new_av_folder.id = data["id"]
             new_av_folder.name = data["path_display"]
-            new_av_folder.desc = data["path_lower"]
+            new_av_folder.desc = data["name"]
         elif data[".tag"] == "file":
             ui_item.client_modified = data["client_modified"]
             ui_item.server_modified = data["server_modified"]
@@ -76,7 +76,6 @@ class FContextMixin:
         return new_items
 
     def move_ui_items(self, moving_items: list, insert_in: int, items: CollectionProperty, parent):
-        # Utiliser items.find avec item.name https://docs.blender.org/api/3.6/bpy.types.bpy_prop_collection.html#bpy.types.bpy_prop_collection.find
         next_index = insert_in
         for item in moving_items:
             item.parent_id = parent.id
@@ -99,7 +98,7 @@ class FDropBoxMixin(FContextMixin):
         )
         return drb.get_content_folder(addon_prefs.token, path)
 
-    def dl_file(self, context, drb_path):
+    def dl_file(self, context, cloud_path):
         addon_prefs = self.addon_prefs(context)
         drb = DropboxAPI(
             app_key=addon_prefs.dropbox_app_key,
@@ -108,5 +107,21 @@ class FDropBoxMixin(FContextMixin):
             fbl_profile_klass=FBlenderProfile,
             bl_preferences=addon_prefs,
         )
-        return drb.download_file(addon_prefs.token, drb_path)
-        
+        return drb.download_file(addon_prefs.token, cloud_path)
+
+    def upl_file(self, context, cloud_path, path_file, file_exist):
+        mode = "overwrite" if file_exist else "add"
+        addon_prefs = self.addon_prefs(context)
+        drb = DropboxAPI(
+            app_key=addon_prefs.dropbox_app_key,
+            app_secret=addon_prefs.dropbox_app_secret,
+            in_blender=True,
+            fbl_profile_klass=FBlenderProfile,
+            bl_preferences=addon_prefs,
+        )
+        return drb.upload_file(
+            addon_prefs.token,
+            path_file,
+            cloud_path,
+            mode,
+        )

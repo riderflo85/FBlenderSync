@@ -5,10 +5,11 @@ from bpy.props import StringProperty
 
 from ..mixins import FDropBoxMixin
 from ..helpers import write_file, check_or_create_local_root_path
+from ..statics import APP_NAME
 
 
 class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
-    bl_idname = "fblender_sync.get_cloud"
+    bl_idname = f"{APP_NAME}.get_cloud"
     bl_label = "Get the content first root Dropbox"
     
     root_drb_path: StringProperty(name="Root path to DropBox cloud", default="")
@@ -26,7 +27,7 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
 
 
 class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
-    bl_idname = "fblender_sync.download_file"
+    bl_idname = f"{APP_NAME}.download_file"
     bl_label = "Download this Dropbox file"
 
     file_drb_path: StringProperty(name="File path to DropBox cloud", default="")
@@ -48,27 +49,74 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class UploadCurrentFile(bpy.types.Operator):
+class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
     """Upload the current file into DropBox"""
-    bl_idname = "fblender_sync.upload_current_file"
+    bl_idname = f"{APP_NAME}.upload_current_file"
     bl_label = "Export Some Data TEST"
 
-    filepath: StringProperty(subtype="FILE_PATH")
+    cloud_folder_object: None
+    local_pathfile: str = ""
+
+    def _get_cloud_folder_obj(self, cloud_collection, folder_id):
+        for item in cloud_collection.values():
+            if folder_id == item.id:
+                self.cloud_folder_object = item
+                break
+        return self.cloud_folder_object
 
     @classmethod
     def poll(cls, context):
-        return context.object is not None
+        return (
+            context.window_manager.save_on_cloud is not None
+            and context.window_manager.save_on_cloud.folders != "-1"
+            and bpy.data.is_saved
+        )
 
     def execute(self, context):
-        self.report({'INFO'}, "TEST LOG 1 path file %s" % self.filepath)
+        wm = context.window_manager
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
-        time.sleep(2) # Simulate the request api timer
+        filename = self.local_pathfile.split("/")[-1]
+        file_already_on_cloud = True if not wm.cloud_data.find(filename) == -1 else False
+        res = self.upl_file(
+            context,
+            self.cloud_folder_object.path_lower,
+            self.local_pathfile,
+            file_already_on_cloud,
+        )
+        if res == "done":
+            self.report({'INFO'}, "Fichier %s, envoyé avec succès !" % filename)
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.report({'INFO'}, "TEST LOG 2")
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+    def draw(self, context):
+        self.local_pathfile = bpy.data.filepath
+        layout = self.layout
+
+        wm = context.window_manager
+        cloud_folder_selected_id = wm.save_on_cloud.folders
+        cloud_folder_selected = self._get_cloud_folder_obj(wm.cloud_data, cloud_folder_selected_id)
+
+        layout.label(
+            text="""
+            Attention l'envoi de fichier peut prendre du temps et bloquer Blender !
+            Merci de patienter !""",
+            icon="ERROR",
+        )
+        layout.separator()
+        col = layout.column()
+        message_title = (
+            "Enregistrer le fichier actuel %s"
+            % self.local_pathfile.split("/")[-1]
+        )
+        message_subtitle = (
+            "sur votre cloud dans le dossier %s"
+            % cloud_folder_selected.name
+        )
+        col.label(text=message_title)
+        col.label(text=message_subtitle)
 
 
 def register():

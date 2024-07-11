@@ -11,6 +11,7 @@ from .operators import FolderContentOpMenu
 from .operators import RefreshFolderContent
 from .operators import GetCloudButton
 from .operators import DownloadFileOperator
+from .statics import APP_NAME
 
 
 class ItemUIList(bpy.types.UIList):
@@ -93,28 +94,34 @@ class ItemUIList(bpy.types.UIList):
             )
             download_file_op.file_drb_path = item.path_display
 
+        if item.is_folder:
+            icon_item = "FILE_FOLDER"
+        elif item.name.split(".")[-1] == "blend":
+            icon_item = "FILE_BLEND"
+        else:
+            icon_item = "FILE_BLANK"
         row.label(
             text=item.name,
-            icon="FILE_FOLDER" if item.is_folder else "FILE_BLANK",
+            icon=icon_item,
         )
 
 
 # Définir une classe de menu personnalisée
 class MyMenu(FMenuMixin, bpy.types.Panel):
-    bl_label = "Menu principal"
-    bl_idname = "fblender_sync.menu"
+    bl_label = "Cloud"
+    bl_idname = f"{APP_NAME}.menu"
 
     def draw(self, context):
         layout = self.layout
 
         # Ajouter des éléments de menu
-        layout.operator(UploadCurrentFile.bl_idname, text="Envoyer le fichier actuel")
-        layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud")
+        # layout.operator(UploadCurrentFile.bl_idname, text="Envoyer le fichier actuel")
+        layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud", icon="URL")
 
 
 class ExplorerMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Fichiers Cloud"
-    bl_idname = "fblender_sync.menu.explorer"
+    bl_idname = f"{APP_NAME}.menu.explorer"
     
     def draw(self, context):
         layout = self.layout
@@ -132,18 +139,17 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
 
 class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Sauvegarde sur le cloud"
-    bl_idname = "fblender_sync.menu.save_on_cloud"
+    bl_idname = f"{APP_NAME}.menu.save_on_cloud"
 
     def draw(self, context):
         layout = self.layout
         wm = context.window_manager
-        
-        layout.label(text="Enregistrer le fichier actuel sur votre cloud")
+
         col = layout.column()
-        col.separator()
-        
         col.prop(wm.save_on_cloud, "folders")
         col.label(text=wm.save_on_cloud.folders)
+        col.separator()
+        layout.operator(UploadCurrentFile.bl_idname, text="Enregistrer")
 
 
 # Enregistrer le menu personnalisé

@@ -5,11 +5,12 @@ from bpy.props import IntProperty
 
 from ..mixins import FDropBoxMixin
 from ..history import MenuOperatorHistory, OperatorHistoryType
+from ..statics import APP_NAME
 
 
 class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
     """Refresh the folder content with Dropbox API request response"""
-    bl_idname = "fblender_sync.refresh_folder_content"
+    bl_idname = f"{APP_NAME}.refresh_folder_content"
     bl_label = "Refresh folder content"
 
     item_ui_list_index: IntProperty(name="Index of folder")
@@ -48,7 +49,7 @@ class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
 
 class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
     """Request the Dropbox cloud to get the content of folder"""
-    bl_idname = "fblender_sync.folder_content_op_menu"
+    bl_idname = f"{APP_NAME}.folder_content_op_menu"
     bl_label = "Content of folder"
 
     item_ui_list_index: IntProperty(name="Index of folder")

@@ -8,7 +8,7 @@ def get_dynamique_cloud_folders(self, context):
     available_cloud_folders = []
     if not available_cloud_folders_obj:
         return [
-            ("badId", "BadName", "BadDescription",)
+            ("-1", "", "",)
         ]
     for cloud_folder in available_cloud_folders_obj:
         available_cloud_folders.append(
@@ -32,7 +32,6 @@ class SaveOnCloudProperties(bpy.types.PropertyGroup):
         description="Available folders on cloud",
         items=get_dynamique_cloud_folders,
     )
-    # file_name: StringProperty(name="Current file name")
 
 
 class ItemExplorerProperties(bpy.types.PropertyGroup):
