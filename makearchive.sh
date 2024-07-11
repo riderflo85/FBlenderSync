@@ -3,7 +3,7 @@
 # Create by Florent Grenaille
 # Create a .zip archive for install addon with Blender settings UI !
 
-FILES=(__init__.py preference.py profiles.py statics.py i18n.py mixins.py menu.py history.py handlers.py)
+FILES=(__init__.py preference.py profiles.py statics.py i18n.py mixins.py menu.py history.py handlers.py properties.py)
 FOLDERS=(server helpers settings operators)
 EXCLUDED_FILES=()
 

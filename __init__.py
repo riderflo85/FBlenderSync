@@ -12,6 +12,7 @@ bl_info = {
 }
 
 import bpy
+from bpy.props import CollectionProperty, IntProperty, PointerProperty
 
 
 if 'preference' in locals():
@@ -22,6 +23,7 @@ if 'preference' in locals():
     menu = importlib.reload(menu)
     history = importlib.reload(history)
     operators = importlib.reload(operators)
+    properties = importlib.reload(properties)
     # handlers = importlib.reload(handlers)
     FBlenderSyncPreferences = preference.FBlenderSyncPreferences
     FBlenderSyncLoginDropbox = preference.FBlenderSyncLoginDropbox
@@ -37,6 +39,9 @@ if 'preference' in locals():
 else:
     from .profiles import make_profiles_path
     from .profiles import FBlenderProfile
+    from .properties import ItemExplorerProperties
+    from .properties import EnumFolderProperties
+    from .properties import SaveOnCloudProperties
     from .preference import FBlenderSyncPreferences
     from .preference import FBlenderSyncLoginDropbox
     from .preference import FBlenderSyncSaveSettings
@@ -54,6 +59,9 @@ klass = (
     FBlenderSyncPreferences,
     FBlenderSyncLoginDropbox,
     FBlenderSyncSaveSettings,
+    ItemExplorerProperties,
+    EnumFolderProperties,
+    SaveOnCloudProperties,
 )
 
 # functions = (
@@ -84,6 +92,11 @@ def register():
     register_operators()
     register_menu()
 
+    bpy.types.WindowManager.cloud_data = CollectionProperty(type=ItemExplorerProperties)
+    bpy.types.WindowManager.cloud_data_index = IntProperty(name="Index for cloud_data", default=-1)
+    bpy.types.WindowManager.save_on_cloud = PointerProperty(type=SaveOnCloudProperties)
+    bpy.types.WindowManager.available_folders = CollectionProperty(type=EnumFolderProperties)
+
 
 def unregister():
     # for klfs in klass + functions:
@@ -93,6 +106,11 @@ def unregister():
     unregister_history()
     unregister_operators()
     unregister_menu()
+
+    del bpy.types.WindowManager.cloud_data
+    del bpy.types.WindowManager.cloud_data_index
+    del bpy.types.WindowManager.save_on_cloud
+    del bpy.types.WindowManager.available_folders
 
 
 if __name__ == "__main__":
