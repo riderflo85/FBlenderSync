@@ -111,7 +111,7 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
     bl_label = "Create a new folder"
 
     item_ui_list_index: IntProperty(name="Index of folder", default=-1)
-    folder_name: StringProperty(name="Folder name")
+    folder_name: StringProperty(name="Nom du dossier")
 
     @classmethod
     def poll(cls, context):
