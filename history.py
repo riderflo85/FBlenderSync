@@ -62,8 +62,8 @@ class MenuOperatorHistory(FContextMixin):
 
 
 def register():
-    types.Scene.menu_history = []
+    types.WindowManager.menu_history = []
 
 
 def unregister():
-    del types.Scene.menu_history
+    del types.WindowManager.menu_history
