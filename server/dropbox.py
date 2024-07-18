@@ -292,3 +292,29 @@ class DropboxAPI:
         else:
             #TODO Renvoyer l'erreur dans l'interface de blender !!!
             raise DropboxError(result['error'])
+
+    def create_folder(self, token: str, path: str) -> dict:
+        """Create the new folder with path.
+
+        Args:
+            token (str): User Access Token
+            path (str): DropBox path for new folder
+            
+        Returns:
+            dict: DropBox response with new folder metadata.
+        """
+        url = f'{DRB_API}/2/files/create_folder_v2'
+        h = self._make_headers(token)
+        data = {
+            "autorename": True,
+            "path": path,
+        }
+        res = requests.post(url, headers=h, json=data)
+        result = self._is_expired_token(res)
+        if not result.get('error') and not result['fallback']:
+            res_data = res.json()
+            return res_data["metadata"]
+        elif not result.get('error') and result['fallback']:
+            return self.create_folder(result['new_token'], path)
+        else:
+            raise DropboxError(result['error'])

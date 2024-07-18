@@ -9,6 +9,7 @@ from .mixins import FMenuMixin, FContextMixin
 from .operators import UploadCurrentFile
 from .operators import FolderContentOpMenu
 from .operators import RefreshFolderContent
+from .operators import NewFolderCloud
 from .operators import GetCloudButton
 from .operators import DownloadFileOperator
 from .statics import APP_NAME
@@ -67,6 +68,13 @@ class ItemUIList(bpy.types.UIList):
             )
             child_op.item_ui_list_index = index
 
+            create_folder_op = row_btn.operator(
+                NewFolderCloud.bl_idname,
+                text="",
+                icon="NEWFOLDER",
+            )
+            create_folder_op.item_ui_list_index = index
+
             refresh_op = row_btn.operator(
                 RefreshFolderContent.bl_idname,
                 text="",
@@ -106,7 +114,6 @@ class ItemUIList(bpy.types.UIList):
         )
 
 
-# Définir une classe de menu personnalisée
 class MyMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Cloud"
     bl_idname = f"{APP_NAME}.menu"
@@ -114,9 +121,8 @@ class MyMenu(FMenuMixin, bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        # Ajouter des éléments de menu
-        # layout.operator(UploadCurrentFile.bl_idname, text="Envoyer le fichier actuel")
         layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud", icon="URL")
+        layout.operator(NewFolderCloud.bl_idname, text="Créer un dossier à la racine", icon="NEWFOLDER")
 
 
 class ExplorerMenu(FMenuMixin, bpy.types.Panel):
@@ -140,6 +146,7 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
 class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Sauvegarde sur le cloud"
     bl_idname = f"{APP_NAME}.menu.save_on_cloud"
+    bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
         layout = self.layout
@@ -147,7 +154,6 @@ class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
 
         col = layout.column()
         col.prop(wm.save_on_cloud, "folders")
-        col.label(text=wm.save_on_cloud.folders)
         col.separator()
         layout.operator(UploadCurrentFile.bl_idname, text="Enregistrer")
 
@@ -159,18 +165,13 @@ def register():
     bpy.utils.register_class(ExplorerMenu)
     bpy.utils.register_class(SaveOnCloudMenu)
 
-    # if not bpy.context.scene.get("metadata", False):
-    #     bpy.context.scene["metadata"] = {
-    #         "scene_version": 1,
+    # if not hasattr(bpy.types.BlendData, "metadata"):
+    #     # metadata is custom property.
+    #     # Access it to bpy.data.metadata
+    #     # OR context.blend_data
+    #     bpy.types.BlendData.metadata = {
+    #         "file_version": 1
     #     }
-
-    if not hasattr(bpy.types.BlendData, "metadata"):
-        # metadata is custom property.
-        # Access it to bpy.data.metadata
-        # OR context.blend_data
-        bpy.types.BlendData.metadata = {
-            "file_version": 1
-        }
 
 # Supprimer le menu personnalisé
 def unregister():
@@ -178,9 +179,3 @@ def unregister():
     bpy.utils.unregister_class(MyMenu)
     bpy.utils.unregister_class(ExplorerMenu)
     bpy.utils.unregister_class(SaveOnCloudMenu)
-
-
-# Exécuter l'enregistrement du menu lors de l'exécution du script
-if __name__ == "__main__":
-    register()
-    # unregister()

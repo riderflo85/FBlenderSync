@@ -87,6 +87,21 @@ class FContextMixin:
 
 
 class FDropBoxMixin(FContextMixin):
+    def cloud_action(self, context, action: str, **kwargs):
+        addon_prefs = self.addon_prefs(context)
+        drb = DropboxAPI(
+            app_key=addon_prefs.dropbox_app_key,
+            app_secret=addon_prefs.dropbox_app_secret,
+            in_blender=True,
+            fbl_profile_klass=FBlenderProfile,
+            bl_preferences=addon_prefs,
+        )
+        if not hasattr(drb, action):
+            raise AttributeError(f"'{DropboxAPI}' object has not attribute '{action}'")
+        drb_action = getattr(drb, action)
+        kwargs["token"] = addon_prefs.token
+        return drb_action(**kwargs)
+
     def get_cloud(self, context, path):
         addon_prefs = self.addon_prefs(context)
         drb = DropboxAPI(
