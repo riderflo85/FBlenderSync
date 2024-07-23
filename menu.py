@@ -5,6 +5,7 @@ import bpy
 from .helpers import get_modified_date_file
 from .helpers import check_local_path_file
 from .settings import FileMoreRecentIn
+from .settings import DownloadMode
 from .mixins import FMenuMixin, FContextMixin
 from .operators import UploadCurrentFile
 from .operators import FolderContentOpMenu
@@ -12,6 +13,7 @@ from .operators import RefreshFolderContent
 from .operators import NewFolderCloud
 from .operators import GetCloudButton
 from .operators import DownloadFileOperator
+from .operators import HelpOperator
 from .statics import APP_NAME
 
 
@@ -120,9 +122,28 @@ class MyMenu(FMenuMixin, bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        addon_prefs = FContextMixin.addon_prefs(context)
+        dl_mode_str = addon_prefs.download_mode
+        dl_mode_desc = DownloadMode.get_desc(dl_mode_str)
+        dl_mode_icon = (
+            "FILE_TICK"
+            if dl_mode_str == DownloadMode.STORE.name
+            else "FILE_NEW"
+        )
 
         layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud", icon="URL")
         layout.operator(NewFolderCloud.bl_idname, text="Créer un dossier à la racine", icon="NEWFOLDER")
+        layout.separator()
+        row = layout.row()
+        row.label(text="Mode de téléchargement :")
+        help_op = row.operator(
+            HelpOperator.bl_idname,
+            text="",
+            icon="QUESTION",
+            emboss=False,
+        )
+        help_op.message = "Peux être changé dans les préférences."
+        layout.label(text=dl_mode_desc, icon=dl_mode_icon)
 
 
 class ExplorerMenu(FMenuMixin, bpy.types.Panel):

@@ -2,6 +2,7 @@ FR = (
     ('Drb-App-Key', 'Clé publique de votre application Dropbox.'),
     ('Drb-App-Secret', 'Clé secrète de votre application Dropbox.'),
     ('Pref-Header-Inputs', 'Entrez vous clés secrètes que vous pouvez retrouvez sur votre compte Dropbox.'),
+    ('Pref-Download-Mode', 'Mode de téléchargement des fichiers cloud.'),
     ('Local-Storage-Folder', 'Dossier dans lequel sera téléchargé vos fichiers de votre cloud.'),
     ('Bt-Label-Login', 'Connexion à l\'API Dropbox.'),
     ('Bt-Save-Settings', 'Enregistrer'),
@@ -14,6 +15,10 @@ FR = (
     ('FMRI-DRB-desc', 'Le fichier est plus récent sur Dropbox.'),
     ('FMRI-Local-desc', 'Le fichier est plus récent sur cet ordinateur.'),
     ('FMRI-MissingLocal-desc', 'Le fichier n\'est pas présent sur cet ordinateur.'),
+    ('DM-Store-name', 'Téléchargé.'),
+    ('DM-Store-desc', 'Le ficher sera téléchargé.'),
+    ('DM-StoreOpen-name', 'Téléchargé et ouvert.'),
+    ('DM-StoreOpen-desc', 'Le ficher sera téléchargé et ouvert.'),
 )
 
 EN = (
