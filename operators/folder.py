@@ -83,10 +83,10 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
                 timestamp=datetime.now(),
             )
             history_op.exec_callback()
-            context.scene.menu_history.append(history_op)
+            wm.menu_history.append(history_op)
         else:
             history_op_objs = [
-                op for op in context.scene.menu_history
+                op for op in wm.menu_history
                 if op.item_id == folder.id and op.op_datetime < datetime.now()
             ]
             history_op_objs.sort(key=lambda i: i.op_datetime, reverse=True)
@@ -100,7 +100,7 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
                 timestamp=datetime.now(),
             )
             history_op.exec_callback()
-            context.scene.menu_history.append(history_op)
+            wm.menu_history.append(history_op)
         folder.is_expanded = not folder.is_expanded
         return {'FINISHED'}
 
@@ -111,7 +111,7 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
     bl_label = "Create a new folder"
 
     item_ui_list_index: IntProperty(name="Index of folder", default=-1)
-    folder_name: StringProperty(name="Folder name")
+    folder_name: StringProperty(name="Nom du dossier")
 
     @classmethod
     def poll(cls, context):

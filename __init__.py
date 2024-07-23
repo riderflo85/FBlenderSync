@@ -3,7 +3,7 @@
 bl_info = {
     'name': 'FBlenderSync',
     'author': 'Florent Grenaille',
-    'version': (1, 0),
+    'version': (1, 0, 0),
     'blender': (3, 0, 0),
     'location': '3D View > Sidebar',
     'description': 'Add the Dropbox Cloud to upload or download blender file.',

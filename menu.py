@@ -31,6 +31,7 @@ class ItemUIList(bpy.types.UIList):
                 item.server_modified.replace("Z", "")
             )
         item_modified_at = max(client_modified_datetime, server_modified_datetime)
+        item_modified_at = item_modified_at.replace(tzinfo=None)
 
         addon_prefs = FContextMixin.addon_prefs(context)
         root_prefix = addon_prefs.local_filepath
