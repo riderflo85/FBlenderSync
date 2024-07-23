@@ -35,3 +35,34 @@ class FileMoreRecentIn(Enum):
     @classmethod
     def values(cls):
         return [e.value for e in cls]
+
+
+class DownloadMode(Enum):
+    STORE = {
+        "name": gt_("DM-Store-name"),
+        "desc": gt_("DM-Store-desc"),
+    }
+    STORE_OPEN = {
+        "name": gt_("DM-StoreOpen-name"),
+        "desc": gt_("DM-StoreOpen-desc"),
+    }
+
+    @classmethod
+    def items_enum_prop(cls):
+        return (
+            (
+                DownloadMode.STORE.name,
+                DownloadMode.STORE.value.get("name"),
+                DownloadMode.STORE.value.get("desc"),
+            ),
+            (
+                DownloadMode.STORE_OPEN.name,
+                DownloadMode.STORE_OPEN.value.get("name"),
+                DownloadMode.STORE_OPEN.value.get("desc"),
+            ),
+        )
+
+    @classmethod
+    def get_desc(cls, enum_name: str):
+        enum_item = getattr(cls, enum_name)
+        return enum_item.value.get("desc")

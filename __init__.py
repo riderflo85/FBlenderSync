@@ -87,6 +87,7 @@ def register():
     preferences.token = FBlenderProfile.ACCESS_TOKEN or 'NOT-SET'
     preferences.refresh_token = FBlenderProfile.REFRESH_TOKEN or 'NOT-SET'
     preferences.expire_token = FBlenderProfile.EXPIRE_TOKEN or 'NOT-SET'
+    preferences.download_mode = FBlenderProfile.DOWNLOAD_MODE
 
     register_history()
     register_operators()

@@ -1,11 +1,10 @@
-import time
-
 import bpy
 from bpy.props import StringProperty
 
 from ..mixins import FDropBoxMixin
 from ..helpers import write_file, check_or_create_local_root_path
 from ..statics import APP_NAME
+from ..settings import DownloadMode
 
 
 class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
@@ -31,6 +30,11 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
     bl_label = "Download this Dropbox file"
 
     file_drb_path: StringProperty(name="File path to DropBox cloud", default="")
+    dl_mode: DownloadMode
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.window_manager.cloud_data) > 0
 
     def execute(self, context):
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
@@ -44,9 +48,21 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
         file_is_writed = write_file(file_path_name, file_bytes)
         if file_is_writed:
             self.report({"INFO"}, "Successfuly writed file !")
+            if self.dl_mode == DownloadMode.STORE_OPEN:
+                bpy.ops.wm.open_mainfile(filepath=file_path_name)
         else:
             self.report({"ERROR"}, "Error with wirted file !")
         return {"FINISHED"}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        addon_prefs = FDropBoxMixin.addon_prefs(context)
+        self.dl_mode = getattr(DownloadMode, addon_prefs.download_mode)
+        return wm.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="L'action `%s` vas être exécutée" % self.dl_mode.value.get("desc"))
 
 
 class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):

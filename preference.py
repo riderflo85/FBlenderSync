@@ -2,15 +2,20 @@ from datetime import datetime
 
 import bpy
 from bpy.types import AddonPreferences, Operator
-from bpy.props import StringProperty
+from bpy.props import StringProperty, EnumProperty
 
 from .server import DropboxAPI
 from .server import DropboxError
+from .settings import DownloadMode
 from .helpers import next_expire_time
 from .mixins import FContextMixin
 from .statics import APP_NAME
 from .i18n import get_label as gt_
 from .profiles import FBlenderProfile
+
+
+def download_mode_options(self, context):
+    return DownloadMode.items_enum_prop()
 
 
 class FBlenderSyncPreferences(AddonPreferences):
@@ -47,6 +52,12 @@ class FBlenderSyncPreferences(AddonPreferences):
         name='expire-token',
         default='',
         options={'HIDDEN', 'SKIP_SAVE'}
+    )
+    download_mode: EnumProperty(
+        name=gt_('Pref-Download-Mode'),
+        description=gt_('Pref-Download-Mode'),
+        items=download_mode_options,
+        default=0
     )
     success_msg: StringProperty(
         name='success-msg',
@@ -90,6 +101,7 @@ class FBlenderSyncPreferences(AddonPreferences):
         layout.prop(self, 'dropbox_app_key')
         layout.prop(self, 'dropbox_app_secret')
         layout.prop(self, 'local_filepath')
+        layout.prop(self, 'download_mode')
         row = layout.row()
         row.operator(FBlenderSyncSaveSettings.bl_idname)
         row.operator(FBlenderSyncLoginDropbox.bl_idname)
@@ -108,6 +120,7 @@ class FBlenderSyncSaveSettings(FContextMixin, Operator):
         FBlenderProfile.APP_SECRET = addon_prefs.dropbox_app_secret
         FBlenderProfile.LOCAL_STORAGE_FOLDER = addon_prefs.local_filepath
         FBlenderProfile.EXPIRE_TOKEN = addon_prefs.expire_token
+        FBlenderProfile.DOWNLOAD_MODE = addon_prefs.download_mode
         FBlenderProfile.save_profiles_data()
 
         return {'FINISHED'}

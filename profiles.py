@@ -3,6 +3,7 @@ import json
 import bpy
 
 from .statics import APP_NAME
+from .settings import DownloadMode
 
 
 class FBlenderProfile:
@@ -13,6 +14,7 @@ class FBlenderProfile:
     ACCESS_TOKEN = ''
     REFRESH_TOKEN = ''
     EXPIRE_TOKEN = ''
+    DOWNLOAD_MODE = DownloadMode.STORE.value.get("id")
     profiles_path = ''
     profiles_file = ''
     json_settings = [
@@ -21,7 +23,8 @@ class FBlenderProfile:
         'LOCAL_STORAGE_FOLDER',
         'ACCESS_TOKEN',
         'REFRESH_TOKEN',
-        'EXPIRE_TOKEN'
+        'EXPIRE_TOKEN',
+        'DOWNLOAD_MODE',
     ]
 
     @classmethod
@@ -71,6 +74,7 @@ def _create_default_config(prof_path, prof_file):
         'ACCESS_TOKEN': '',
         'REFRESH_TOKEN': '',
         'EXPIRE_TOKEN': '',
+        'DOWNLOAD_MODE': DownloadMode.STORE.value.get("id")
     }
 
     os.makedirs(prof_path, exist_ok=True)
@@ -113,6 +117,7 @@ def get_profiles_data(prof_path, prof_file):
             file_data['LOCAL_STORAGE_FOLDER']
             file_data['ACCESS_TOKEN']
             file_data['REFRESH_TOKEN']
+            file_data['DOWNLOAD_MODE']
             return file_data
         except (ValueError,  # malformed json data
                 KeyError):  # it doesn't have the expected content
