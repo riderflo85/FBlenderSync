@@ -30,6 +30,7 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
     bl_label = "Download this Dropbox file"
 
     file_drb_path: StringProperty(name="File path to DropBox cloud", default="")
+    file_name: StringProperty(name="File name", default="")
     dl_mode: DownloadMode
 
     @classmethod
@@ -57,7 +58,10 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
     def invoke(self, context, event):
         wm = context.window_manager
         addon_prefs = FDropBoxMixin.addon_prefs(context)
-        self.dl_mode = getattr(DownloadMode, addon_prefs.download_mode)
+        if self.file_name.endswith(".blend"):
+            self.dl_mode = getattr(DownloadMode, addon_prefs.download_mode)
+        else:
+            self.dl_mode = DownloadMode.STORE
         return wm.invoke_props_dialog(self)
 
     def draw(self, context):

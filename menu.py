@@ -104,6 +104,7 @@ class ItemUIList(bpy.types.UIList):
                 icon="IMPORT"
             )
             download_file_op.file_drb_path = item.path_display
+            download_file_op.file_name = item.name
 
         if item.is_folder:
             icon_item = "FILE_FOLDER"
