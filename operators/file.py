@@ -15,7 +15,7 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
-        res = self.get_cloud(context, self.root_drb_path)
+        res = self.cloud_action(context, "get_content_folder", path=self.root_drb_path)
         bpy.context.window.cursor_set("DEFAULT")
         wm = context.window_manager
         if len(wm.cloud_data) > 0:
@@ -39,7 +39,7 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
-        file_infos, file_bytes = self.dl_file(context, self.file_drb_path)
+        file_infos, file_bytes = self.cloud_action(context, "download_file", path=self.file_drb_path)
         path_sync_folder = self.addon_prefs(context).local_filepath
         file_path_name = f"{path_sync_folder}{self.file_drb_path}"
         file_path_name = file_path_name.replace("//", "/")
@@ -97,11 +97,13 @@ class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
         filename = self.local_pathfile.split("/")[-1]
         file_already_on_cloud = True if not wm.cloud_data.find(filename) == -1 else False
-        res = self.upl_file(
+        mode = "overwrite" if file_already_on_cloud else "add"
+        res = self.cloud_action(
             context,
-            self.cloud_folder_object.path_lower,
-            self.local_pathfile,
-            file_already_on_cloud,
+            "upload_file",
+            path_file=self.cloud_folder_object.path_lower,
+            dropbox_path_folder=self.local_pathfile,
+            mode=mode,
         )
         if res == "done":
             self.report({'INFO'}, "Fichier %s, envoyé avec succès !" % filename)

@@ -20,7 +20,7 @@ class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
         folder = wm.cloud_data[self.item_ui_list_index]
 
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
-        res = self.get_cloud(context, folder.path_lower)
+        res = self.cloud_action(context, "get_content_folder", path=folder.path_lower)
         bpy.context.window.cursor_set("DEFAULT")
 
         if folder.is_expanded:
@@ -59,7 +59,7 @@ class FolderContentOpMenu(FDropBoxMixin, bpy.types.Operator):
         folder = wm.cloud_data[self.item_ui_list_index]
         if not folder.children_as_requested:
             bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
-            res = self.get_cloud(context, folder.path_lower)
+            res = self.cloud_action(context, "get_content_folder", path=folder.path_lower)
             bpy.context.window.cursor_set("DEFAULT")
             new_items = self.add_ui_list_with_dropbox_data(res, context)
             self.move_ui_items(
