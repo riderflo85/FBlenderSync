@@ -14,7 +14,7 @@ class FBlenderProfile:
     ACCESS_TOKEN = ''
     REFRESH_TOKEN = ''
     EXPIRE_TOKEN = ''
-    DOWNLOAD_MODE = DownloadMode.STORE.value.get("id")
+    DOWNLOAD_MODE = DownloadMode.STORE.name
     profiles_path = ''
     profiles_file = ''
     json_settings = [
@@ -74,7 +74,7 @@ def _create_default_config(prof_path, prof_file):
         'ACCESS_TOKEN': '',
         'REFRESH_TOKEN': '',
         'EXPIRE_TOKEN': '',
-        'DOWNLOAD_MODE': DownloadMode.STORE.value.get("id")
+        'DOWNLOAD_MODE': DownloadMode.STORE.name
     }
 
     os.makedirs(prof_path, exist_ok=True)
