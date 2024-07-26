@@ -72,7 +72,7 @@ class DownloadFileOperator(FDropBoxMixin, bpy.types.Operator):
 class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
     """Upload the current file into DropBox"""
     bl_idname = f"{APP_NAME}.upload_current_file"
-    bl_label = "Export Some Data TEST"
+    bl_label = "Export Some Data"
 
     cloud_folder_object: None
     local_pathfile: str = ""
@@ -122,11 +122,11 @@ class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
         cloud_folder_selected = self._get_cloud_folder_obj(wm.cloud_data, cloud_folder_selected_id)
 
         layout.label(
-            text="""
-            Attention l'envoi de fichier peut prendre du temps et bloquer Blender !
-            Merci de patienter !""",
+            text="Attention l'envoi de fichier peut prendre",
             icon="ERROR",
         )
+        layout.label(text="du temps et bloquer Blender !")
+        layout.label(text="Merci de patienter !")
         layout.separator()
         col = layout.column()
         message_title = (

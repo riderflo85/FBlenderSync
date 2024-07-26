@@ -16,7 +16,7 @@ class HelpOperator(bpy.types.Operator):
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        return wm.invoke_props_dialog(self, width=400)
 
     def draw(self, context):
         layout = self.layout

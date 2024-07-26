@@ -17,7 +17,7 @@ FR = (
     ('FMRI-MissingLocal-desc', 'Le fichier n\'est pas présent sur cet ordinateur.'),
     ('DM-Store-name', 'Téléchargé.'),
     ('DM-Store-desc', 'Le ficher sera téléchargé.'),
-    ('DM-StoreOpen-name', 'Téléchargé et ouvert.'),
+    ('DM-StoreOpen-name', 'Téléchargé et ouvrir.'),
     ('DM-StoreOpen-desc', 'Le ficher sera téléchargé et ouvert.'),
 )
 
