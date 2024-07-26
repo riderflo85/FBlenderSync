@@ -116,13 +116,12 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
     @staticmethod
     def _add_folder(wm, data):
         new_folder = wm.cloud_data.add()
-        new_available_folder = wm.available_folders.add()
         new_folder.tag = "folder"
         new_folder.is_folder = True
-        new_folder.name = new_available_folder.desc = data["name"]
-        new_folder.id = new_available_folder.id = data["id"]
+        new_folder.name = data["name"]
+        new_folder.id = data["id"]
         new_folder.path_lower = data["path_lower"]
-        new_folder.path_display = new_available_folder.name = data["path_display"]
+        new_folder.path_display = data["path_display"]
         splited_path = data["path_lower"].split("/")
         splited_path.pop(0)
         new_folder.indent_level = len(splited_path) - 1

@@ -18,7 +18,8 @@ from .operators import HelpOperator
 from .statics import APP_NAME
 
 
-class ItemUIList(bpy.types.UIList):
+class PANEL_UL_ItemUIList(bpy.types.UIList):
+    bl_idname = f"PANEL_UL_{APP_NAME}_menu_item"
     # ---- This feature is comment because is not finish :( ----
     # @staticmethod
     # def _must_updated(context, item):
@@ -51,15 +52,13 @@ class ItemUIList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         main_column = layout.column()
 
-        # ---- This feature is comment because is not finish :( ----
-        # file_state_column = layout.column()
+        file_state_column = layout.column()
 
         btn_column = layout.column()
 
         row = main_column.row(align=True)
 
-        # ---- This feature is comment because is not finish :( ----
-        # row_file_state = file_state_column.row()
+        row_file_state = file_state_column.row()
 
         row_btn = btn_column.row()
 
@@ -100,6 +99,7 @@ class ItemUIList(bpy.types.UIList):
             # else:
             #     version_state_icon = FileMoreRecentIn.MISSING_LOCAL.value["icon"]
             # row_file_state.label(text="", icon=version_state_icon)
+            row_file_state.label(text="", icon="BLANK1")
 
             download_file_op = row_btn.operator(
                 DownloadFileOperator.bl_idname,
@@ -121,9 +121,9 @@ class ItemUIList(bpy.types.UIList):
         )
 
 
-class MyMenu(FMenuMixin, bpy.types.Panel):
+class VIEW3D_PT_CloudMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Cloud"
-    bl_idname = f"{APP_NAME}.menu"
+    bl_idname = f"VIEW3D_PT_{APP_NAME}_menu"
 
     def draw(self, context):
         layout = self.layout
@@ -151,16 +151,16 @@ class MyMenu(FMenuMixin, bpy.types.Panel):
         layout.label(text=dl_mode_desc, icon=dl_mode_icon)
 
 
-class ExplorerMenu(FMenuMixin, bpy.types.Panel):
+class VIEW3D_PT_ExplorerMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Fichiers Cloud"
-    bl_idname = f"{APP_NAME}.menu.explorer"
+    bl_idname = f"VIEW3D_PT_{APP_NAME}_menu_explorer"
     
     def draw(self, context):
         layout = self.layout
         wm = context.window_manager
 
         row = layout.row()
-        row.template_list("ItemUIList", "", wm, "cloud_data", wm, "cloud_data_index")
+        row.template_list(PANEL_UL_ItemUIList.bl_idname, "", wm, "cloud_data", wm, "cloud_data_index")
         
         col = layout.column()
         col.separator()
@@ -170,9 +170,9 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
         #     col.label(text=state["description"], icon=state["icon"])
 
 
-class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
+class VIEW3D_PT_SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
     bl_label = "Sauvegarde sur le cloud"
-    bl_idname = f"{APP_NAME}.menu.save_on_cloud"
+    bl_idname = f"VIEW3D_PT_{APP_NAME}_menu_save_on_cloud"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -187,10 +187,10 @@ class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
 
 # Enregistrer le menu personnalisé
 def register():
-    bpy.utils.register_class(ItemUIList)
-    bpy.utils.register_class(MyMenu)
-    bpy.utils.register_class(ExplorerMenu)
-    bpy.utils.register_class(SaveOnCloudMenu)
+    bpy.utils.register_class(PANEL_UL_ItemUIList)
+    bpy.utils.register_class(VIEW3D_PT_CloudMenu)
+    bpy.utils.register_class(VIEW3D_PT_ExplorerMenu)
+    bpy.utils.register_class(VIEW3D_PT_SaveOnCloudMenu)
 
     # if not hasattr(bpy.types.BlendData, "metadata"):
     #     # metadata is custom property.
@@ -202,7 +202,7 @@ def register():
 
 # Supprimer le menu personnalisé
 def unregister():
-    bpy.utils.unregister_class(ItemUIList)
-    bpy.utils.unregister_class(MyMenu)
-    bpy.utils.unregister_class(ExplorerMenu)
-    bpy.utils.unregister_class(SaveOnCloudMenu)
+    bpy.utils.unregister_class(PANEL_UL_ItemUIList)
+    bpy.utils.unregister_class(VIEW3D_PT_CloudMenu)
+    bpy.utils.unregister_class(VIEW3D_PT_ExplorerMenu)
+    bpy.utils.unregister_class(VIEW3D_PT_SaveOnCloudMenu)
