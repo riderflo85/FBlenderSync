@@ -318,3 +318,26 @@ class DropboxAPI:
             return self.create_folder(result['new_token'], path)
         else:
             raise DropboxError(result['error'])
+
+    def get_storage_infos(self, token: str) -> tuple:
+        """Get the DropBox storage space usage infos.
+
+        Args:
+            token (str): User Access Token
+            
+        Returns:
+            tuple: allocated and used.
+        """
+        url = f'{DRB_API}/2/users/get_space_usage'
+        h = self._make_headers(token)
+        res = requests.post(url, headers=h)
+        result = self._is_expired_token(res)
+        if not result.get('error') and not result['fallback']:
+            res_data = res.json()
+            bytes_allocated = res_data['allocation']['allocated']
+            bytes_used = res_data['used']
+            return bytes_allocated, bytes_used
+        elif not result.get('error') and result['fallback']:
+            return self.get_storage_infos(result['new_token'])
+        else:
+            raise DropboxError(result['error'])

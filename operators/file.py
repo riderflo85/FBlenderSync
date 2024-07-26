@@ -16,6 +16,8 @@ class GetCloudButton(FDropBoxMixin, bpy.types.Operator):
     def execute(self, context):
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
         res = self.cloud_action(context, "get_content_folder", path=self.root_drb_path)
+        b_allocated, b_used = self.cloud_action(context, "get_storage_infos")
+        self.set_storage_infos(context, b_allocated, b_used)
         bpy.context.window.cursor_set("DEFAULT")
         wm = context.window_manager
         if len(wm.cloud_data) > 0:

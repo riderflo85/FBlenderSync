@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty
+from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
 
 def get_dynamique_cloud_folders(self, context):
@@ -51,3 +51,10 @@ class ItemExplorerProperties(bpy.types.PropertyGroup):
     parent_id: StringProperty(name="Folder parent")
     indent_level: IntProperty(name="Indentation", default=0)
     index: IntProperty(name="Index in collection", default=-1)
+
+
+class StorageCloudProperties(bpy.types.PropertyGroup):
+    used: FloatProperty(name="Space used", precision=3)
+    allocated: FloatProperty(name="Space Left", precision=3)
+    factor: FloatProperty(name="Factor for progress bar", precision=2)
+    unit: StringProperty(name="Unit", default="Go")

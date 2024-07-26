@@ -127,6 +127,7 @@ class VIEW3D_PT_CloudMenu(FMenuMixin, bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        wm = context.window_manager
         addon_prefs = FContextMixin.addon_prefs(context)
         dl_mode_str = addon_prefs.download_mode
         dl_mode_desc = DownloadMode.get_desc(dl_mode_str)
@@ -138,6 +139,15 @@ class VIEW3D_PT_CloudMenu(FMenuMixin, bpy.types.Panel):
 
         layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud", icon="URL")
         layout.operator(NewFolderCloud.bl_idname, text="Créer un dossier à la racine", icon="NEWFOLDER")
+        if wm.cloud_data:
+            layout.separator()
+            col = layout.column()
+            col.label(text="Stockage cloud", icon="OUTLINER_OB_GROUP_INSTANCE")
+            col.progress(
+                text="%s / %s %s" % (wm.cloud_storage.used, wm.cloud_storage.allocated, wm.cloud_storage.unit),
+                factor=wm.cloud_storage.factor,
+                type="RING",
+            )
         layout.separator()
         row = layout.row()
         row.label(text="Mode de téléchargement :")

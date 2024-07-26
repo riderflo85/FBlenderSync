@@ -46,6 +46,16 @@ class FContextMixin:
         for index, item in enumerate(collection):
             item.index = index
 
+    def set_storage_infos(self, context, allocated: bytes, used: bytes):
+        wm = context.window_manager
+        # 1 gigaoctet = 1 073 741 824 bytes
+        giga_in_bytes = 1073741824
+        allocated_go = allocated / giga_in_bytes
+        used_go = used / giga_in_bytes
+        wm.cloud_storage.allocated = allocated_go
+        wm.cloud_storage.used = used_go
+        wm.cloud_storage.factor = (used_go * 100) / allocated_go
+
     @staticmethod
     def collection_to_dict_index(collection: CollectionProperty) -> dict:
         return {
