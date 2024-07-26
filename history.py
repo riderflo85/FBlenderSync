@@ -38,7 +38,8 @@ class MenuOperatorHistory(FContextMixin):
     def _remove_items_in_bpy_context(self):
         for child in self.childrens:
             # The collection has been mutated and the indexes are no longer correct.
-            child_index = self.collection.find(child["name"])
+            dict_collection = self.collection_to_dict_index(self.collection)
+            child_index = dict_collection.get(child["id"])
             self.collection.remove(child_index)
         self._set_items_index(self.collection)
 

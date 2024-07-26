@@ -47,6 +47,13 @@ class FContextMixin:
             item.index = index
 
     @staticmethod
+    def collection_to_dict_index(collection: CollectionProperty) -> dict:
+        return {
+            i.id: index
+            for index, i in enumerate(collection)
+        }
+
+    @staticmethod
     def get_childs(folder, folder_index: int, find_in: CollectionProperty):
         childrens = []
         for item in find_in:
@@ -71,8 +78,9 @@ class FContextMixin:
     def move_ui_items(self, moving_items: list, insert_in: int, items: CollectionProperty, parent):
         next_index = insert_in
         for item in moving_items:
+            dict_collection = self.collection_to_dict_index(items)
             item.parent_id = parent.id
-            item_index = items.find(item.name)
+            item_index = dict_collection.get(item.id)
             if item_index >= 0:
                 items.move(item_index, next_index)
                 next_index += 1

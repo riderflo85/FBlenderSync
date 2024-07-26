@@ -143,8 +143,8 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
         cloud_response = self.cloud_action(context, "create_folder", path=root_path)
         bpy.context.window.cursor_set("DEFAULT")
         if folder_parent:
-            new_folder = self._add_folder(wm, cloud_response)
             if folder_parent.is_expanded:
+                new_folder = self._add_folder(wm, cloud_response)
                 self.move_ui_items(
                     moving_items=[new_folder],
                     insert_in=self.item_ui_list_index+1,
@@ -160,6 +160,7 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
             self._add_folder(wm, cloud_response)
 
         self.folder_name = ""
+        self.item_ui_list_index = -1
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -169,6 +170,7 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         layout.label(text="Créer un dossier")
+        layout.label(text=str(self.item_ui_list_index))
         layout.separator()
         col = layout.column()
         col.prop(self, "folder_name")
