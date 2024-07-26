@@ -1,10 +1,11 @@
-from datetime import datetime
+# from datetime import datetime
 
 import bpy
 
-from .helpers import get_modified_date_file
-from .helpers import check_local_path_file
-from .settings import FileMoreRecentIn
+# ---- This feature is comment because is not finish :( ----
+# from .helpers import get_modified_date_file
+# from .helpers import check_local_path_file
+# from .settings import FileMoreRecentIn
 from .settings import DownloadMode
 from .mixins import FMenuMixin, FContextMixin
 from .operators import UploadCurrentFile
@@ -18,44 +19,47 @@ from .statics import APP_NAME
 
 
 class ItemUIList(bpy.types.UIList):
-    @staticmethod
-    def _must_updated(context, item):
-        try:
-            # For python v3.11 and later
-            client_modified_datetime = datetime.fromisoformat(item.client_modified)
-            server_modified_datetime = datetime.fromisoformat(item.server_modified)
-        except ValueError:
-            # For python before v3.11
-            client_modified_datetime = datetime.fromisoformat(
-                item.client_modified.replace("Z", "")
-            )
-            server_modified_datetime = datetime.fromisoformat(
-                item.server_modified.replace("Z", "")
-            )
-        item_modified_at = max(client_modified_datetime, server_modified_datetime)
-        item_modified_at = item_modified_at.replace(tzinfo=None)
+    # ---- This feature is comment because is not finish :( ----
+    # @staticmethod
+    # def _must_updated(context, item):
+    #     try:
+    #         # For python v3.11 and later
+    #         client_modified_datetime = datetime.fromisoformat(item.client_modified)
+    #         server_modified_datetime = datetime.fromisoformat(item.server_modified)
+    #     except ValueError:
+    #         # For python before v3.11
+    #         client_modified_datetime = datetime.fromisoformat(
+    #             item.client_modified.replace("Z", "")
+    #         )
+    #         server_modified_datetime = datetime.fromisoformat(
+    #             item.server_modified.replace("Z", "")
+    #         )
+    #     item_modified_at = max(client_modified_datetime, server_modified_datetime)
+    #     item_modified_at = item_modified_at.replace(tzinfo=None)
 
-        addon_prefs = FContextMixin.addon_prefs(context)
-        root_prefix = addon_prefs.local_filepath
+    #     addon_prefs = FContextMixin.addon_prefs(context)
+    #     root_prefix = addon_prefs.local_filepath
 
-        local_file_path = f"{root_prefix}{item.path_lower}"
-        local_file_modified_at = get_modified_date_file(local_file_path)
+    #     local_file_path = f"{root_prefix}{item.path_lower}"
+    #     local_file_modified_at = get_modified_date_file(local_file_path)
 
-        if local_file_modified_at > item_modified_at:
-            return FileMoreRecentIn.LOCAL.value
-        else:
-            return FileMoreRecentIn.DRB.value
+    #     if local_file_modified_at > item_modified_at:
+    #         return FileMoreRecentIn.LOCAL.value
+    #     else:
+    #         return FileMoreRecentIn.DRB.value
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         main_column = layout.column()
 
-        file_state_column = layout.column()
+        # ---- This feature is comment because is not finish :( ----
+        # file_state_column = layout.column()
 
         btn_column = layout.column()
 
         row = main_column.row(align=True)
 
-        row_file_state = file_state_column.row()
+        # ---- This feature is comment because is not finish :( ----
+        # row_file_state = file_state_column.row()
 
         row_btn = btn_column.row()
 
@@ -87,16 +91,15 @@ class ItemUIList(bpy.types.UIList):
             refresh_op.item_ui_list_index = index
 
         else:
-            addon_prefs = FContextMixin.addon_prefs(context)
-            root_prefix = addon_prefs.local_filepath
-            item_in_local = check_local_path_file(f"{root_prefix}{item.path_lower}")
-
-            if item_in_local:
-                version_state_icon = self._must_updated(context, item)["icon"]
-            else:
-                version_state_icon = FileMoreRecentIn.MISSING_LOCAL.value["icon"]
-
-            row_file_state.label(text="", icon=version_state_icon)
+            # ---- This feature is comment because is not finish :( ----
+            # addon_prefs = FContextMixin.addon_prefs(context)
+            # root_prefix = addon_prefs.local_filepath
+            # item_in_local = check_local_path_file(f"{root_prefix}{item.path_lower}")
+            # if item_in_local:
+            #     version_state_icon = self._must_updated(context, item)["icon"]
+            # else:
+            #     version_state_icon = FileMoreRecentIn.MISSING_LOCAL.value["icon"]
+            # row_file_state.label(text="", icon=version_state_icon)
 
             download_file_op = row_btn.operator(
                 DownloadFileOperator.bl_idname,
@@ -162,8 +165,9 @@ class ExplorerMenu(FMenuMixin, bpy.types.Panel):
         col = layout.column()
         col.separator()
 
-        for state in FileMoreRecentIn.values():
-            col.label(text=state["description"], icon=state["icon"])
+        # ---- This feature is comment because is not finish :( ----
+        # for state in FileMoreRecentIn.values():
+        #     col.label(text=state["description"], icon=state["icon"])
 
 
 class SaveOnCloudMenu(FMenuMixin, bpy.types.Panel):
