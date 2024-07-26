@@ -4,26 +4,26 @@ from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty
 
 def get_dynamique_cloud_folders(self, context):
     wm = context.window_manager
-    available_cloud_folders_obj = wm.available_folders
     available_cloud_folders = []
-    if not available_cloud_folders_obj:
+    if not wm.cloud_data:
         return [
             ("-1", "", "",)
         ]
-    for cloud_folder in available_cloud_folders_obj:
+
+    for cloud_data in wm.cloud_data:
+        if not cloud_data.is_folder:
+            continue
+        folder_name = cloud_data.path_display
+        folder_name = folder_name[1:] if folder_name.startswith("/") else folder_name
         available_cloud_folders.append(
             (
-                cloud_folder.id,
-                cloud_folder.name,
-                cloud_folder.desc,
+                cloud_data.id,
+                folder_name,
+                cloud_data.path_lower,
             )
         )
-    return available_cloud_folders
 
-class EnumFolderProperties(bpy.types.PropertyGroup):
-    id: StringProperty(name="id cloud")
-    name: StringProperty(name="folder name")
-    desc: StringProperty(name="description")
+    return available_cloud_folders
 
 
 class SaveOnCloudProperties(bpy.types.PropertyGroup):
