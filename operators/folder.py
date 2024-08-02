@@ -134,6 +134,8 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
         return len(context.window_manager.cloud_data) > 0
 
     def execute(self, context):
+        if self.folder_name == "":
+            return {"CANCELLED"}
         wm = context.window_manager
         if self.item_ui_list_index == -1:
             root_path = "/%s" % self.folder_name
@@ -163,7 +165,7 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
 
         self.folder_name = ""
         self.item_ui_list_index = -1
-        return {'FINISHED'}
+        return {"FINISHED"}
 
     def invoke(self, context, event):
         wm = context.window_manager
