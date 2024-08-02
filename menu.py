@@ -143,8 +143,15 @@ class VIEW3D_PT_CloudMenu(FMenuMixin, bpy.types.Panel):
             layout.separator()
             col = layout.column()
             col.label(text="Stockage cloud", icon="OUTLINER_OB_GROUP_INSTANCE")
+            cl_st = wm.cloud_storage
+            graph_text = "%s %s / %s %s" % (
+                round(cl_st.used, ndigits=2),
+                cl_st.unit_u,
+                round(cl_st.allocated, ndigits=2),
+                cl_st.unit_a
+            )
             col.progress(
-                text="%s / %s %s" % (wm.cloud_storage.used, wm.cloud_storage.allocated, wm.cloud_storage.unit),
+                text=graph_text,
                 factor=wm.cloud_storage.factor,
                 type="RING",
             )

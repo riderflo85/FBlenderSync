@@ -54,7 +54,8 @@ class ItemExplorerProperties(bpy.types.PropertyGroup):
 
 
 class StorageCloudProperties(bpy.types.PropertyGroup):
-    used: FloatProperty(name="Space used", precision=3)
-    allocated: FloatProperty(name="Space Left", precision=3)
+    used: FloatProperty(name="Space used", precision=2)
+    allocated: FloatProperty(name="Space Left", precision=2)
     factor: FloatProperty(name="Factor for progress bar", precision=2)
-    unit: StringProperty(name="Unit", default="Go")
+    unit_u: StringProperty(name="Unit used", default="Octet")
+    unit_a: StringProperty(name="Unit allocated", default="Octet")

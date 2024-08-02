@@ -107,6 +107,8 @@ class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
             mode=mode,
         )
         if res == "done":
+            b_allocated, b_used = self.cloud_action(context, "get_storage_infos")
+            self.set_storage_infos(context, b_allocated, b_used)
             self.report({'INFO'}, "Fichier %s, envoyé avec succès !" % filename)
         return {'FINISHED'}
 

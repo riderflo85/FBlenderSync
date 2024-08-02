@@ -49,12 +49,39 @@ class FContextMixin:
     def set_storage_infos(self, context, allocated: bytes, used: bytes):
         wm = context.window_manager
         # 1 gigaoctet = 1 073 741 824 bytes
-        giga_in_bytes = 1073741824
-        allocated_go = allocated / giga_in_bytes
-        used_go = used / giga_in_bytes
-        wm.cloud_storage.allocated = allocated_go
-        wm.cloud_storage.used = used_go
-        wm.cloud_storage.factor = (used_go * 100) / allocated_go
+        bytes_in_giga = 1073741824
+        # 1 megaoctet = 1 048 576 bytes
+        bytes_in_mega = 1048576
+        # 1 kilooctet = 1 024 bytes
+        bytes_in_kilo = 1024
+
+        for index, b_unit in enumerate([allocated, used]):
+            convert = 0.0
+            unit = ""
+            if b_unit >= bytes_in_giga:
+                convert = b_unit / bytes_in_giga
+                unit = "Go"
+            elif b_unit < bytes_in_giga and b_unit >= bytes_in_mega:
+                convert = b_unit / bytes_in_mega
+                unit = "Mo"
+            elif b_unit < bytes_in_mega and b_unit >= bytes_in_kilo:
+                convert = b_unit / bytes_in_kilo
+                unit = "Ko"
+            else:
+                convert = b_unit
+                unit = "Octet"
+            match index:
+                case 0:
+                    wm.cloud_storage.allocated = convert
+                    wm.cloud_storage.unit_a = unit
+                case 1:
+                    wm.cloud_storage.used = convert
+                    wm.cloud_storage.unit_u = unit
+
+        wm.cloud_storage.factor = (
+            (((used / bytes_in_mega) * 100) / (allocated / bytes_in_mega))
+            / 100
+        )
 
     @staticmethod
     def collection_to_dict_index(collection: CollectionProperty) -> dict:

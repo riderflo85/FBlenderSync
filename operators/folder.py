@@ -21,6 +21,8 @@ class RefreshFolderContent(FDropBoxMixin, bpy.types.Operator):
 
         bpy.context.window.cursor_set("WAIT") # Set the mouse cursor to WAIT icon
         res = self.cloud_action(context, "get_content_folder", path=folder.path_lower)
+        b_allocated, b_used = self.cloud_action(context, "get_storage_infos")
+        self.set_storage_infos(context, b_allocated, b_used)
         bpy.context.window.cursor_set("DEFAULT")
 
         if folder.is_expanded:
@@ -170,7 +172,6 @@ class NewFolderCloud(FDropBoxMixin, bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         layout.label(text="Créer un dossier")
-        layout.label(text=str(self.item_ui_list_index))
         layout.separator()
         col = layout.column()
         col.prop(self, "folder_name")
