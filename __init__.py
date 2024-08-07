@@ -42,6 +42,7 @@ else:
     from .properties import ItemExplorerProperties
     from .properties import SaveOnCloudProperties
     from .properties import StorageCloudProperties
+    from .properties import RemoveCloudItemProperties
     from .preference import FBlenderSyncPreferences
     from .preference import FBlenderSyncLoginDropbox
     from .preference import FBlenderSyncSaveSettings
@@ -62,6 +63,7 @@ klass = (
     ItemExplorerProperties,
     SaveOnCloudProperties,
     StorageCloudProperties,
+    RemoveCloudItemProperties,
 )
 
 # functions = (
@@ -96,6 +98,7 @@ def register():
     bpy.types.WindowManager.cloud_data_index = IntProperty(name="Index for cloud_data", default=-1)
     bpy.types.WindowManager.save_on_cloud = PointerProperty(type=SaveOnCloudProperties)
     bpy.types.WindowManager.cloud_storage = PointerProperty(type=StorageCloudProperties)
+    bpy.types.WindowManager.items_to_delete = PointerProperty(type=RemoveCloudItemProperties)
 
 
 def unregister():
@@ -111,6 +114,7 @@ def unregister():
     del bpy.types.WindowManager.cloud_data_index
     del bpy.types.WindowManager.save_on_cloud
     del bpy.types.WindowManager.cloud_storage
+    del bpy.types.WindowManager.items_to_delete
 
 
 if __name__ == "__main__":

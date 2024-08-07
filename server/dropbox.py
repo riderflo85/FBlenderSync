@@ -341,3 +341,25 @@ class DropboxAPI:
             return self.get_storage_infos(result['new_token'])
         else:
             raise DropboxError(result['error'])
+
+    def delete_file_or_folder(self, token: str, id_target: str) -> str:
+        """Delete a file or folder on DropBox with specified DropBox ID.
+
+        Args:
+            token (str): User Access Token.
+            id_target (str): DropBox ID to delete item.
+
+        Returns:
+            str: `done` or error.
+        """
+        url = f'{DRB_API}/2/files/delete_v2'
+        h = self._make_headers(token)
+        data = {'path': id_target}
+        res = requests.post(url, headers=h, json=data)
+        result = self._is_expired_token(res)
+        if not result.get('error') and not result['fallback']:
+            return 'done'
+        elif not result.get('error') and result['fallback']:
+            return self.delete_file_or_folder(result['new_token'])
+        else:
+            raise DropboxError(result['error'])

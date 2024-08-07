@@ -2,19 +2,41 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
 
+EMPTY_ENUM = [("-1", "", "",)]
+
+def sanitize_path(path: str) -> str:
+    return path[1:] if path.startswith("/") else path
+
+
+def get_dynamique_cloud_items(self, context):
+    wm = context.window_manager
+    available_items = []
+    if not wm.cloud_data:
+        return EMPTY_ENUM
+
+    for cloud_data in wm.cloud_data:
+        item_name = sanitize_path(cloud_data.path_display)
+        available_items.append(
+            (
+                cloud_data.id,
+                item_name,
+                cloud_data.name,
+            )
+        )
+
+    return available_items
+
+
 def get_dynamique_cloud_folders(self, context):
     wm = context.window_manager
     available_cloud_folders = []
     if not wm.cloud_data:
-        return [
-            ("-1", "", "",)
-        ]
+        return EMPTY_ENUM
 
     for cloud_data in wm.cloud_data:
         if not cloud_data.is_folder:
             continue
-        folder_name = cloud_data.path_display
-        folder_name = folder_name[1:] if folder_name.startswith("/") else folder_name
+        folder_name = sanitize_path(cloud_data.path_display)
         available_cloud_folders.append(
             (
                 cloud_data.id,
@@ -31,6 +53,14 @@ class SaveOnCloudProperties(bpy.types.PropertyGroup):
         name="Dossier cible",
         description="Available folders on cloud",
         items=get_dynamique_cloud_folders,
+    )
+
+
+class RemoveCloudItemProperties(bpy.types.PropertyGroup):
+    item: EnumProperty(
+        name="Item",
+        description="Item à supprimer",
+        items=get_dynamique_cloud_items
     )
 
 

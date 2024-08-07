@@ -15,6 +15,7 @@ from .operators import NewFolderCloud
 from .operators import GetCloudButton
 from .operators import DownloadFileOperator
 from .operators import HelpOperator
+from .operators import DeleteCloudItem
 from .statics import APP_NAME
 
 
@@ -139,6 +140,7 @@ class VIEW3D_PT_CloudMenu(FMenuMixin, bpy.types.Panel):
 
         layout.operator(GetCloudButton.bl_idname, text="Consulter le cloud", icon="URL")
         layout.operator(NewFolderCloud.bl_idname, text="Créer un dossier à la racine", icon="NEWFOLDER")
+        layout.operator(DeleteCloudItem.bl_idname, text="Supprimer un item", icon="TRASH")
         if wm.cloud_data:
             layout.separator()
             col = layout.column()

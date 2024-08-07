@@ -11,14 +11,19 @@ from .folder import unregister as folder_unregister
 from .helper import HelpOperator
 from .helper import register as helper_register
 from .helper import unregister as helper_unregister
+from .item import DeleteCloudItem
+from .item import register as item_register
+from .item import unregister as item_unregister
 
 
 def register():
     helper_register()
     file_register()
     folder_register()
+    item_register()
 
 def unregister():
     helper_unregister()
     file_unregister()
     folder_unregister()
+    item_unregister()
