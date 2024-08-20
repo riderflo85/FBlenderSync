@@ -102,8 +102,8 @@ class UploadCurrentFile(FDropBoxMixin, bpy.types.Operator):
         res = self.cloud_action(
             context,
             "upload_file",
-            path_file=self.cloud_folder_object.path_lower,
-            dropbox_path_folder=self.local_pathfile,
+            path_file=self.local_pathfile,
+            dropbox_path_folder=self.cloud_folder_object.path_lower,
             mode=mode,
         )
         if res == "done":
